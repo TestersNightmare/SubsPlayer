@@ -1,0 +1,68 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+*.jks
+*.idsig
+*.log
+*.bat
+#*.py
+#/app/*.py
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Windows thumbnail db
+Thumbs.db
+
+# OSX files
+.DS_Store
+
+# Android Studio
+*.iml
+.idea
+.gradle
+/dist
+/build
+/captures
+/__pycache__
+/ko
+
+# NDK
+
+*.salive
+
+*.zip
+*.rar
+*.exe
+ffmpeg/bin/ffprobe.exe
+ffmpeg/bin/ffplay.exe
+ffmpeg/bin/ffmpeg.exe
+libmpv-2.dll
+*.pdb
+/config.json
+# Secrets
+config.json
+.env
+.env.*
+
+# FFmpeg / mpv
+ffmpeg/
+libmpv-2.dll
+
+# Executables
+*.exe
+*.dll
+*.pdb
+
+# Python
+__pycache__/
+*.pyc
+
+# Build
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/

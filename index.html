@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubsPlayer - 高效专业的字幕播放与辅助工具</title>
+    <!-- 极简引入 Tailwind CSS 无需本地构建 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide 图标库 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- 顶部导航栏 -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 font-bold text-xl tracking-wider text-white">
+                <i data-lucide="play-circle" class="text-indigo-500 w-7 h-7"></i>
+                <span>SubsPlayer</span>
+            </div>
+            <a href="https://github.com/你的用户名/仓库名" target="_blank" class="text-sm text-slate-400 hover:text-white transition flex items-center gap-1">
+                <i data-lucide="github" class="w-4 h-4"></i> GitHub 仓库
+            </a>
+        </div>
+    </header>
+
+    <!-- 主视觉与第一首屏 (Hero Section) -->
+    <main class="flex-grow">
+        <section class="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+            <!-- 版本标签 -->
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wide mb-8">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                v1.0.0 正式版现已开放下载
+            </div>
+            
+            <!-- 核心标语 -->
+            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
+                让每一次字幕配合 <br class="hidden sm:inline" />
+                <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">精准、高效、优雅</span>
+            </h1>
+            <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                专为追求极致体验打造的独立桌面客户端。提供丝滑的渲染性能、丰富的参数自定义，以及前所未有的快捷操作闭环。
+            </p>
+
+            <!-- 下载按钮区域 -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+                <a href="https://github.com/你的用户名/公开仓库名/releases/latest/download/SubsPlayer-Setup.exe" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition duration-200 flex items-center justify-center gap-3 text-lg">
+                    <i data-lucide="download" class="w-6 h-6"></i>
+                    下载 Windows 正式版
+                    <span class="text-xs bg-indigo-700/80 px-2 py-0.5 rounded font-normal text-indigo-200">64-Bit</span>
+                </a>
+            </div>
+            
+            <!-- 国内备用链接提示 -->
+            <p class="text-xs text-slate-500">
+                支持 Win10 / Win11 · 
+                <a href="这里填写你123云盘或网盘的链接" target="_blank" class="text-slate-400 hover:text-indigo-400 underline transition">国内网盘极速备用下载 &rarr;</a>
+            </p>
+        </section>
+
+        <!-- 软件截图展示窗口 -->
+        <section class="max-w-5xl mx-auto px-6 mb-24">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-2 sm:p-4 shadow-2xl shadow-indigo-500/10">
+                <div class="rounded-xl overflow-hidden bg-slate-950 aspect-video flex items-center justify-center border border-slate-800/80 relative group">
+                    <!-- TODO: 把下方的 src 替换为你真正的软件界面截图网址 -->
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop" alt="SubsPlayer 界面展示" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-500" />
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span class="bg-slate-900/80 backdrop-blur text-slate-300 text-sm px-4 py-2 rounded-lg border border-slate-700">软件运行主界面效果示意 (请替换为实际截图)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心功能亮点 (3 列卡片) -->
+        <section class="max-w-6xl mx-auto px-6 pb-24">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center text-white mb-12">为什么选择 SubsPlayer？</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 功能 1 -->
+                <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 transition">
+                    <div class="w-12 h-12 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">极速轻量启动</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">底层算法高度优化，告别繁重的内存占用与卡顿，秒开超大文件，运行毫无负担。</p>
+                </div>
+                <!-- 功能 2 -->
+                <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 transition">
+                    <div class="w-12 h-12 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-4">
+                        <i data-lucide="sliders" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">全参数自由控制</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">提供丰富的自定义调参能力，满足高级玩家与专业场景的不同苛刻诉求，随心调配。</p>
+                </div>
+                <!-- 功能 3 -->
+                <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 transition">
+                    <div class="w-12 h-12 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center mb-4">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">无广告零打扰</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">纯粹的独立开发者工具。无任何后台静默流氓行为、无强制弹窗，把干净的桌面还给你。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 底部页脚 -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-8 text-center text-sm text-slate-600">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>&copy; 2026 SubsPlayer. All rights reserved.</div>
+            <div class="flex gap-6 text-slate-500">
+                <a href="https://github.com/你的用户名/公开仓库名/issues" target="_blank" class="hover:text-slate-400 transition">反馈 Bug / 建议</a>
+                <a href="mailto:your-email@example.com" class="hover:text-slate-400 transition">联系开发者</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 渲染图标库 -->
+    <script>lucide.createIcons();</script>
+</body>
+</html>
