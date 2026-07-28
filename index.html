@@ -1,120 +1,1338 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SubsPlayer - 高效专业的字幕播放与辅助工具</title>
-    <!-- 极简引入 Tailwind CSS 无需本地构建 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide 图标库 -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>SubsPlayer — 能翻译字幕的专业播放器</title>
+ <meta name="description" content="SubsPlayer 是一款整合了视频字幕提取、音频对齐、AI 翻译、硬字幕OCR识别翻译以及双语字幕生产的 Windows 桌面播放与字幕编辑软件。">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script src="https://unpkg.com/lucide@latest"></script>
+ <script>
+ tailwind.config = {
+ darkMode: 'class',
+ theme: {
+ extend: {
+ fontFamily: {
+ sans: ['Inter','Microsoft YaHei','sans-serif'],
+ display: ['Outfit','Inter','sans-serif'],
+ },
+ colors: {
+ brand: { 500:'#4F8CFF', 600:'#3A74EA', glow:'#00F2FE' },
+ app: { bg:'#0B0F19', surface:'#111827', border:'#1F2937' }
+ }
+ }
+ }
+ }
+ </script>
+ <style>
+ :root {
+ --hdr-h: 96px; /* h-24 */
+ --lc: rgba(255,255,255,0.09); /* grid-line colour */
+ }
+ @media(min-width:768px){ :root{ --hdr-h: 144px; } }
+
+ html {
+ scroll-behavior: smooth;
+ scroll-snap-type: y mandatory;
+ overflow-x: hidden;
+ background: #0B0F19;
+ }
+ body { background:#0B0F19; color:#F3F4F6; margin:0; padding:0; }
+
+ /* ── Snap section wrapper ── */
+ .full-page-section {
+ scroll-snap-align: start;
+ scroll-snap-stop: always;
+ height: 100vh;
+ width: 100vw;
+ position: relative;
+ overflow: hidden;
+ display: flex;
+ flex-direction: column;
+ }
+
+ /* ── Section background (base.jpg default, Bing override when online) ── */
+ .section-bg {
+ position: absolute;
+ top: -5%; left: -5%;
+ width: 125%; height: 110%;
+ background-image: url('Screenshot/base.jpg');
+ background-size: cover; background-position: center;
+ z-index: 0; transition: opacity .6s;
+ will-change: transform;
+ animation: bgPanLeft 45s ease-in-out infinite alternate;
+ }
+ @keyframes bgPanLeft {
+ 0% {
+ transform: translate3d(0, 0, 0);
+ }
+ 100% {
+ transform: translate3d(-15%, 0, 0);
+ }
+ }
+ .section-overlay {
+ position: absolute; inset: 0;
+ background: linear-gradient(
+ 160deg,
+ rgba(11,15,25,.80) 0%,
+ rgba(11,15,25,.55) 50%,
+ rgba(11,15,25,.78) 100%
+ );
+ z-index: 1;
+ }
+
+ /* ── Fixed canvas for projected grid lines ── */
+ #grid-canvas {
+ position: fixed; inset: 0;
+ width:100%; height:100%;
+ pointer-events: none;
+ z-index: 2;
+ }
+
+ /* ══════════════════════════════════════════════
+ .grid-cell — Element border that also acts as
+ a "line anchor". The canvas reads these rects
+ and projects each edge to the full viewport edge.
+ Applied to every meaningful UI block:
+ column panels, badge, headings, desc, buttons row.
+ Colour matches canvas: rgba(255,255,255,0.09)
+ ══════════════════════════════════════════════ */
+ .grid-cell {
+ position: relative;
+ box-sizing: border-box;
+ border: 1px solid var(--lc);
+ }
+
+ /* ── Section body: fills height BELOW fixed header ── */
+ .section-body {
+ position: relative;
+ z-index: 10;
+ width: 100%;
+ margin-top: var(--hdr-h);
+ flex: 1 1 0; /* fills remaining 100vh - hdr */
+ min-height: 0;
+ display: flex;
+ flex-direction: column;
+ }
+
+ /* ── Two-column feature grid: each column fills full body height ── */
+ .feature-cols {
+ flex: 1 1 0;
+ min-height: 0;
+ display: grid;
+ grid-template-columns: 5fr 7fr;
+ }
+ .feature-cols.rev { grid-template-columns: 7fr 5fr; }
+ @media(max-width:1023px){
+ .feature-cols, .feature-cols.rev {
+ grid-template-columns: 1fr;
+ overflow-y: auto;
+ }
+ }
+
+ /* Column panels fill height, flex-col for internal stacking */
+ .col-text, .col-shot {
+ display: flex;
+ flex-direction: column;
+ min-height: 0;
+ overflow: hidden;
+ }
+
+ /* Text column: badge top / heading flex-grow / desc bottom */
+ .col-text-inner {
+ display: flex;
+ flex-direction: column;
+ height: 100%;
+ }
+ .col-badge { flex: 0 0 auto; }
+ .col-heading{ flex: 1 1 0; display:flex; align-items:center; }
+ .col-desc { flex: 0 0 auto; }
+
+ /* Screenshot column: image fills full height */
+ .col-shot {
+ justify-content: stretch;
+ align-items: stretch;
+ }
+ .shot-wrap {
+ flex: 1 1 0;
+ min-height: 0;
+ overflow: hidden;
+ position: relative;
+ cursor: pointer;
+ }
+ .shot-wrap img {
+ width: 100%; height: 100%;
+ object-fit: cover;
+ display: block;
+ transition: transform .4s ease;
+ }
+ .shot-wrap:hover img { transform: scale(1.025); }
+ .shot-overlay-label {
+ position: absolute; bottom: 18px; right: 18px;
+ background: rgba(11,15,25,.65);
+ border: 1px solid var(--lc);
+ color: rgba(255,255,255,.6);
+ font-size: 11px; font-weight: 700;
+ padding: 4px 10px; border-radius:0;
+ pointer-events: none;
+ }
+
+ /* ── Hero section fills height with one tall block ── */
+ .hero-body {
+ position: relative; z-index: 10;
+ margin-top: var(--hdr-h);
+ flex: 1 1 0; min-height: 0;
+ display: flex; flex-direction: column;
+ }
+ .hero-content {
+ display: flex; flex-direction: column;
+ height: 100%; width: 100%;
+ }
+ .hero-badge { flex:0 0 auto; }
+ .hero-head { flex:1 1 0; display:flex; align-items:center; justify-content:center; }
+ .hero-sub { flex:0 0 auto; }
+ .hero-btns { flex:0 0 auto; }
+
+ /* ── Download section three blocks ── */
+ .dl-body {
+ position: relative; z-index: 10;
+ margin-top: var(--hdr-h);
+ flex: 1 1 0; min-height: 0;
+ display: flex; flex-direction: column;
+ }
+ .dl-title { flex: 1 1 0; display:flex; flex-direction:column; justify-content:center; }
+ .dl-btns { flex: 0 0 auto; }
+ .dl-foot { flex: 0 0 auto; }
+
+ /* ── Fade animations ── */
+ .fade-content {
+ opacity: 0;
+ transform: translateY(24px);
+ transition: opacity .8s cubic-bezier(.16,1,.3,1),
+ transform .8s cubic-bezier(.16,1,.3,1);
+ will-change: opacity, transform;
+ display: contents; /* transparent wrapper, children layout normally */
+ }
+ .full-page-section.active .fade-content {
+ opacity: 1; transform: none;
+ }
+ /* fallback for browsers where 'contents' breaks transition */
+ @supports not (display: contents) {
+ .fade-content { display: block; height: 100%; }
+ }
+
+ /* ── Header ── */
+ #site-header {
+ position: fixed;
+ top:0; left:0; right:0;
+ height: var(--hdr-h);
+ z-index: 50;
+ /* Glassmorphism: background image shows through */
+ background: rgba(11,15,25,.28);
+ backdrop-filter: blur(28px) saturate(1.4);
+ -webkit-backdrop-filter: blur(28px) saturate(1.4);
+ border-bottom: 1px solid rgba(255,255,255,0.09);
+ /* Subtle gradient tint so logo/text remain legible */
+ box-shadow: 0 1px 40px rgba(11,15,25,.35);
+ display: flex; align-items: center; justify-content: space-between;
+ padding: 0 1rem;
+ box-sizing: border-box;
+ }
+ @media(min-width:640px){ #site-header{ padding:0 2rem; } }
+ @media(min-width:768px){ #site-header{ padding:0 4rem; } }
+
+ /* ── Logo responsive ── */
+ .logo-wrap { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+ @media(min-width:768px){ .logo-wrap{ gap:20px; } }
+ .sub3-box {
+ background:#4F8CFF; border-radius:0; padding:6px;
+ width:52px; height:52px;
+ display:flex; align-items:center; justify-content:center;
+ flex-shrink:0; box-shadow:0 0 20px rgba(79,140,255,.4);
+ }
+ @media(min-width:640px){ .sub3-box{ width:72px; height:72px; padding:8px; border-radius:0; } }
+ @media(min-width:768px){ .sub3-box{ width:100px; height:100px; padding:10px; border-radius:0;
+ box-shadow:0 0 35px rgba(79,140,255,.6); } }
+ .sub3-box img { width:100%; height:100%; object-fit:contain; }
+ .sub2-logo { height:36px; width:auto; max-width:160px; object-fit:contain; flex-shrink:0;
+ filter:drop-shadow(0 0 14px rgba(79,140,255,.5)); }
+ @media(min-width:640px){ .sub2-logo{ height:52px; max-width:220px; } }
+ @media(min-width:768px){ .sub2-logo{ height:80px; max-width:none; } }
+
+ /* ── Lightbox ── */
+ .lightbox { display:none; position:fixed; inset:0; z-index:200;
+ background:rgba(4,6,12,.96); backdrop-filter:blur(20px);
+ align-items:center; justify-content:center; }
+ .lightbox.open { display:flex; }
+
+ /* ── Bing credit ── */
+ #bing-credit {
+ position:fixed; bottom:10px; right:14px;
+ color:rgba(255,255,255,.35); font-size:10px;
+ font-family:Inter,sans-serif; z-index:40; pointer-events:none;
+ }
+ </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="antialiased selection:bg-brand-500 selection:text-white">
 
-    <!-- 顶部导航栏 -->
-    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 font-bold text-xl tracking-wider text-white">
-                <i data-lucide="play-circle" class="text-indigo-500 w-7 h-7"></i>
-                <span>SubsPlayer</span>
-            </div>
-            <a href="https://github.com/你的用户名/仓库名" target="_blank" class="text-sm text-slate-400 hover:text-white transition flex items-center gap-1">
-                <i data-lucide="github" class="w-4 h-4"></i> GitHub 仓库
-            </a>
+<canvas id="grid-canvas"></canvas>
+<div id="bing-credit">©  SubsPlayer</div>
+
+<!-- ════════════ HEADER ════════════ -->
+<header id="site-header">
+ <a href="#hero" class="logo-wrap group">
+ <div class="sub3-box group-hover:scale-105 transition duration-300">
+ <img src="sub3.png" alt="SubsPlayer Icon">
+ </div>
+ <img src="sub2.png" alt="SubsPlayer" class="sub2-logo">
+ </a>
+
+ <div class="flex items-center gap-3 sm:gap-6">
+  <nav class="hidden md:flex items-center gap-6 lg:gap-10">
+  <a href="#feature-1" data-i18n="nav_edit" class="text-xl lg:text-2xl font-black text-slate-200 hover:text-cyan-400 transition hover:scale-105 transform">字幕编辑</a>
+  <a href="#feature-2" data-i18n="nav_play" class="text-xl lg:text-2xl font-black text-slate-200 hover:text-brand-500 transition hover:scale-105 transform">播放工具</a>
+  <a href="#feature-3" data-i18n="nav_bilingual" class="text-xl lg:text-2xl font-black text-slate-200 hover:text-purple-400 transition hover:scale-105 transform">双语生产</a>
+  <a href="#feature-4" data-i18n="nav_engine" class="text-xl lg:text-2xl font-black text-slate-200 hover:text-emerald-400 transition hover:scale-105 transform">智能引擎</a>
+  <a href="#download-page" data-i18n="nav_download" class="text-xl lg:text-2xl font-black text-brand-500 hover:text-brand-glow transition hover:scale-105 transform">现在下载</a>
+  </nav>
+
+  <!-- Multi-language Custom Interactive Dropdown -->
+  <div class="relative inline-block text-left" id="lang-dropdown-wrap">
+    <button type="button" onclick="toggleLangDropdown(event)" id="lang-menu-btn"
+            class="px-2.5 sm:px-3.5 py-1.5 bg-black/40 hover:bg-black/70 border border-white/20 hover:border-brand-500 text-xs sm:text-sm font-bold text-slate-100 flex items-center gap-2 transition cursor-pointer">
+      <svg class="w-4 h-4 text-brand-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
+      <span id="current-lang-name">简体中文</span>
+      <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+    </button>
+
+    <div id="lang-menu" class="hidden absolute right-0 mt-2 w-44 bg-slate-900/95 border border-white/20 shadow-2xl backdrop-blur-xl py-1 z-[100] max-h-72 overflow-y-auto">
+      <button type="button" onclick="selectLang('zh')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇨🇳 简体中文</button>
+      <button type="button" onclick="selectLang('en')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇺🇸 English</button>
+      <button type="button" onclick="selectLang('ja')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇯🇵 日本語</button>
+      <button type="button" onclick="selectLang('ko')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇰🇷 한국어</button>
+      <button type="button" onclick="selectLang('vi')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇻🇳 Tiếng Việt</button>
+      <button type="button" onclick="selectLang('id')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇮🇩 Bahasa Indonesia</button>
+      <button type="button" onclick="selectLang('fr')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇫🇷 Français</button>
+      <button type="button" onclick="selectLang('de')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇩🇪 Deutsch</button>
+      <button type="button" onclick="selectLang('hi')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇮🇳 हिन्दी</button>
+      <button type="button" onclick="selectLang('pt')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇵🇹 Português</button>
+      <button type="button" onclick="selectLang('es')" class="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-brand-500 hover:text-white flex items-center justify-between transition">🇪🇸 Español</button>
+    </div>
+  </div>
+
+  <div class="md:hidden">
+  <a href="https://pan.baidu.com/s/placeholder_subsplayer" target="_blank"
+  data-i18n="nav_mobile_dl" class="px-3 py-1.5 bg-brand-500 text-white text-xs font-bold">网盘下载</a>
+  </div>
+ </div>
+</header>
+
+<main class="w-full">
+
+<!-- ════════════ HERO ════════════ -->
+<section id="hero" class="full-page-section active">
+ <div class="section-bg" data-bing-idx="0" style="background-image:url('Screenshot/base.jpg')"></div>
+ <div class="section-overlay"></div>
+
+ <div class="hero-body w-full">
+ <div class="fade-content">
+ <div class="hero-content">
+
+ <!-- badge -->
+ <div class="grid-cell hero-badge px-6 sm:px-12 py-3 sm:py-4 flex items-center gap-3">
+ <span class="w-2.5 h-2.5 bg-brand-glow animate-ping flex-shrink-0"></span>
+ <span data-i18n="hero_badge" class="text-brand-500 text-xs sm:text-base md:text-lg font-black tracking-wider">
+ SubsPlayer V1.0.0 正式版发布 · 支持 Gemini 多模型翻译引擎
+ </span>
+ </div>
+
+ <!-- headline -->
+ <div class="grid-cell hero-head px-6 sm:px-12 py-6 sm:py-10">
+  <h1 data-i18n="hero_title" class="font-display text-[clamp(1.1rem,4.5vw,5.2rem)] font-black tracking-tight leading-[1.12] text-white text-center w-full">
+    <span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis">一边播放 一边翻译</span>
+    <span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis"><span class="text-brand-500">视频播放器</span> + <span class="text-brand-500">字幕编辑器</span></span>
+    <span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis">为双语字幕而生</span>
+  </h1>
+ </div>
+
+ <!-- subtitle -->
+ <div class="grid-cell hero-sub px-6 sm:px-12 py-4 sm:py-6">
+ <p data-i18n="hero_sub" class="text-slate-300 text-sm sm:text-xl md:text-2xl max-w-5xl mx-auto leading-relaxed font-medium text-center">
+一分钟自动生成双语字幕，无需四处寻找<br>一键完成全部双语字幕工作流，流畅直观、省时省力
+ </p>
+ </div>
+
+ <!-- buttons (rendered dynamically from unified actionButtonsData source) -->
+ <div id="hero-buttons-container" class="grid-cell hero-btns px-4 sm:px-12 py-4 sm:py-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-6 text-center"></div>
+
+ </div><!-- hero-content -->
+ </div><!-- fade-content -->
+ </div><!-- hero-body -->
+</section>
+
+ <!-- ════════════ FEATURE 1 ════════════ -->
+<section id="feature-1" class="full-page-section">
+ <div class="section-bg" data-bing-idx="1" style="background-image:url('Screenshot/base.jpg')"></div>
+ <div class="section-overlay"></div>
+
+ <div class="section-body">
+ <div class="fade-content">
+ <div class="feature-cols rev h-full">
+
+ <!-- Screenshot column (left) -->
+ <div class="grid-cell col-shot lg:order-1">
+ <div class="shot-wrap flex-1"
+ onclick="openLightbox('Screenshot/main2.jpg','f1_badge')">
+ <img src="Screenshot/main2.jpg" alt="SubsPlayer 自动翻译字幕">
+ <div data-i18n="shot_label" class="shot-overlay-label">点击放大查看</div>
+ </div>
+ </div>
+
+ <!-- Text column (right) -->
+ <div class="grid-cell col-text lg:order-2">
+ <div class="col-text-inner h-full">
+ <div class="grid-cell col-badge px-7 sm:px-10 py-4 sm:py-5">
+ <span data-i18n="f1_badge" class="inline-block px-4 py-2 
+ bg-cyan-500/20 text-cyan-400 text-sm sm:text-xl font-black uppercase tracking-wider
+ border border-cyan-500/40">
+自动生产字幕
+ </span>
+ </div>
+ <div class="grid-cell col-heading px-7 sm:px-10 py-6 sm:py-8">
+ <h2 data-i18n="f1_title" class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight">
+没字幕很烦？<br> <span class="text-brand-500">自动生成双语字幕</span><br>外语学习和追剧<br>不用再等待
+ </h2>
+ </div>
+ <div class="grid-cell col-desc px-7 sm:px-10 py-5 sm:py-8">
+ <p data-i18n="f1_desc" class="text-slate-300 text-sm sm:text-lg md:text-xl leading-relaxed font-medium">
+ 打开视频自动提取外文字幕，AI大模型专业翻译<br>自定义双语ASS字幕，自动加载播放<br>1 2 3，再也不用四处寻找字幕文件
+ </p>
+ </div>
+ </div>
+ </div>
+
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- ════════════ FEATURE 2 ════════════ -->
+<section id="feature-2" class="full-page-section">
+ <div class="section-bg" data-bing-idx="2" style="background-image:url('Screenshot/base.jpg')"></div>
+ <div class="section-overlay"></div>
+
+ <div class="section-body">
+ <div class="fade-content">
+ <div class="feature-cols h-full">
+
+ <!-- Text column -->
+ <div class="grid-cell col-text">
+ <div class="col-text-inner h-full">
+ <div class="grid-cell col-badge px-7 sm:px-10 py-4 sm:py-5">
+ <span data-i18n="f2_badge" class="inline-block px-4 py-2 
+ bg-brand-500/20 text-brand-500 text-sm sm:text-xl font-black uppercase tracking-wider
+ border border-brand-500/40">
+ 高清播放工具
+ </span>
+ </div>
+ <div class="grid-cell col-heading px-7 sm:px-10 py-6 sm:py-8">
+ <h2 data-i18n="f2_title" class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight">
+ 也是一款<br><span class="text-brand-500">现代全功能</span><br>视频播放器
+ </h2>
+ </div>
+ <div class="grid-cell col-desc px-7 sm:px-10 py-5 sm:py-8">
+ <p data-i18n="f2_desc" class="text-slate-300 text-sm sm:text-lg md:text-xl leading-relaxed font-medium">
+ 基于高效的 mpv 原生视听渲染内核构建，现代界面<br>内封字幕和音轨切换，倍速播放，快进快退，外挂字幕位置自定义<br>支持 4K/8K HDR 格式高帧率解码与自定义快捷键操控，帧级控制随心所欲
+ </p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Screenshot column -->
+ <div class="grid-cell col-shot">
+ <div class="shot-wrap flex-1"
+ onclick="openLightbox('Screenshot/main.jpg','f2_badge')">
+ <img src="Screenshot/main.jpg" alt="SubsPlayer 视频播放主界面">
+ <div data-i18n="shot_label" class="shot-overlay-label">点击放大查看</div>
+ </div>
+ </div>
+
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- ════════════ FEATURE 3 ════════════ -->
+<section id="feature-3" class="full-page-section">
+ <div class="section-bg" data-bing-idx="3" style="background-image:url('Screenshot/base.jpg')"></div>
+ <div class="section-overlay"></div>
+
+ <div class="section-body">
+ <div class="fade-content">
+ <div class="feature-cols h-full">
+
+ <div class="grid-cell col-text">
+ <div class="col-text-inner h-full">
+ <div class="grid-cell col-badge px-7 sm:px-10 py-4 sm:py-5">
+ <span data-i18n="f3_badge" class="inline-block px-4 py-2 
+ bg-purple-500/20 text-purple-400 text-sm sm:text-xl font-black uppercase tracking-wider
+ border border-purple-500/40">
+双语字幕编辑
+ </span>
+ </div>
+ <div class="grid-cell col-heading px-7 sm:px-10 py-6 sm:py-8">
+ <h2 data-i18n="f3_title" class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight">
+ <span class="text-brand-500">提取→对齐→翻译<br>→编辑→OCR→特效</span>
+ <br>更是一款<br>双语字幕生产力工具
+ </h2>
+ </div>
+ <div class="grid-cell col-desc px-7 sm:px-10 py-5 sm:py-8">
+ <p data-i18n="f3_desc" class="text-slate-300 text-sm sm:text-lg md:text-xl leading-relaxed font-medium">
+ 打通字幕制作全链路<br>提取字幕轨道、音频时点对齐、智能格式清洗、硬字幕框选 OCR 识别与翻译、双窗口实时编辑预览<br>真正的双语字幕生产力平台
+ </p>
+ </div>
+ </div>
+ </div>
+
+ <div class="grid-cell col-shot">
+ <div class="shot-wrap flex-1"
+ onclick="openLightbox('Screenshot/main1ass.jpg','f3_badge')">
+ <img src="Screenshot/main1ass.jpg" alt="双语字幕生产力平台">
+ <div data-i18n="shot_label" class="shot-overlay-label">点击放大查看</div>
+ </div>
+ </div>
+
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- ════════════ FEATURE 4 ════════════ -->
+<section id="feature-4" class="full-page-section">
+ <div class="section-bg" data-bing-idx="4" style="background-image:url('Screenshot/base.jpg')"></div>
+ <div class="section-overlay"></div>
+
+ <div class="section-body">
+ <div class="fade-content">
+ <div class="feature-cols rev h-full">
+
+ <div class="grid-cell col-shot lg:order-1">
+ <div class="shot-wrap flex-1"
+ onclick="openLightbox('Screenshot/main2ass.jpg','f4_badge')">
+ <img src="Screenshot/main2ass.jpg" alt="双语 ASS 生产">
+ <div data-i18n="shot_label" class="shot-overlay-label">点击放大查看</div>
+ </div>
+ </div>
+
+ <div class="grid-cell col-text lg:order-2">
+ <div class="col-text-inner h-full">
+ <div class="grid-cell col-badge px-7 sm:px-10 py-4 sm:py-5">
+ <span data-i18n="f4_badge" class="inline-block px-4 py-2 
+ bg-emerald-500/20 text-emerald-400 text-sm sm:text-xl font-black uppercase tracking-wider
+ border border-emerald-500/40">
+智能模型翻译
+ </span>
+ </div>
+ <div class="grid-cell col-heading px-7 sm:px-10 py-6 sm:py-8">
+ <h2 data-i18n="f4_title" class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-snug">
+只要你想得到<br><span class="text-brand-500">Gemini AI 免费模型</span><br>支持生产多种语言双语字幕
+ </h2>
+ </div>
+ <div class="grid-cell col-desc px-7 sm:px-10 py-5 sm:py-8">
+ <p data-i18n="f4_desc" class="text-slate-300 text-sm sm:text-lg md:text-xl leading-relaxed font-medium">
+ 支持自定义更多顶级模型<br>中英 中韩 韩英 日中双语<br>为双语字幕而生 为分享而生 
+ </p>
+ </div>
+ </div>
+ </div>
+
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- ════════════ DOWNLOAD ════════════ -->
+<section id="download-page" class="full-page-section">
+ <div class="section-bg" data-bing-idx="5" style="background-image:url('Screenshot/base.jpg')"></div>
+ <div class="section-overlay"></div>
+
+ <div class="dl-body w-full">
+ <div class="fade-content">
+ <div class="hero-content">
+
+ <!-- title -->
+ <div class="grid-cell dl-title px-6 sm:px-12 py-2 sm:py-4 text-center flex flex-col items-center justify-center flex-1">
+
+    <!-- Compact Assembled Logo Combo -->
+    <div class="flex flex-col items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+        <div class="bg-[#4F8CFF] p-3 sm:p-5 md:p-6 w-[128px] h-[128px] sm:w-[168px] sm:h-[168px] md:w-[200px] md:h-[200px] flex items-center justify-center shadow-[0_0_50px_rgba(79,140,255,0.6)] flex-shrink-0">
+            <img src="sub3.png" alt="SubsPlayer Icon" class="w-full h-full object-contain">
         </div>
-    </header>
 
-    <!-- 主视觉与第一首屏 (Hero Section) -->
-    <main class="flex-grow">
-        <section class="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
-            <!-- 版本标签 -->
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wide mb-8">
-                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                v1.0.0 正式版现已开放下载
-            </div>
-            
-            <!-- 核心标语 -->
-            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
-                让每一次字幕配合 <br class="hidden sm:inline" />
-                <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">精准、高效、优雅</span>
-            </h1>
-            <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                专为追求极致体验打造的独立桌面客户端。提供丝滑的渲染性能、丰富的参数自定义，以及前所未有的快捷操作闭环。
-            </p>
+        <img src="sub2.png" alt="SubsPlayer"
+             class="h-[72px] sm:h-[96px] md:h-[120px] w-auto object-contain filter drop-shadow-[0_0_36px_rgba(79,140,255,0.6)]">
 
-            <!-- 下载按钮区域 -->
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-                <a href="https://github.com/你的用户名/公开仓库名/releases/latest/download/SubsPlayer-Setup.exe" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition duration-200 flex items-center justify-center gap-3 text-lg">
-                    <i data-lucide="download" class="w-6 h-6"></i>
-                    下载 Windows 正式版
-                    <span class="text-xs bg-indigo-700/80 px-2 py-0.5 rounded font-normal text-indigo-200">64-Bit</span>
-                </a>
-            </div>
-            
-            <!-- 国内备用链接提示 -->
-            <p class="text-xs text-slate-500">
-                支持 Win10 / Win11 · 
-                <a href="这里填写你123云盘或网盘的链接" target="_blank" class="text-slate-400 hover:text-indigo-400 underline transition">国内网盘极速备用下载 &rarr;</a>
-            </p>
-        </section>
-
-        <!-- 软件截图展示窗口 -->
-        <section class="max-w-5xl mx-auto px-6 mb-24">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-2 sm:p-4 shadow-2xl shadow-indigo-500/10">
-                <div class="rounded-xl overflow-hidden bg-slate-950 aspect-video flex items-center justify-center border border-slate-800/80 relative group">
-                    <!-- TODO: 把下方的 src 替换为你真正的软件界面截图网址 -->
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop" alt="SubsPlayer 界面展示" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-500" />
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span class="bg-slate-900/80 backdrop-blur text-slate-300 text-sm px-4 py-2 rounded-lg border border-slate-700">软件运行主界面效果示意 (请替换为实际截图)</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 核心功能亮点 (3 列卡片) -->
-        <section class="max-w-6xl mx-auto px-6 pb-24">
-            <h2 class="text-2xl sm:text-3xl font-bold text-center text-white mb-12">为什么选择 SubsPlayer？</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- 功能 1 -->
-                <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 transition">
-                    <div class="w-12 h-12 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
-                        <i data-lucide="zap" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">极速轻量启动</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">底层算法高度优化，告别繁重的内存占用与卡顿，秒开超大文件，运行毫无负担。</p>
-                </div>
-                <!-- 功能 2 -->
-                <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 transition">
-                    <div class="w-12 h-12 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-4">
-                        <i data-lucide="sliders" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">全参数自由控制</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">提供丰富的自定义调参能力，满足高级玩家与专业场景的不同苛刻诉求，随心调配。</p>
-                </div>
-                <!-- 功能 3 -->
-                <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 transition">
-                    <div class="w-12 h-12 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center mb-4">
-                        <i data-lucide="shield-check" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">无广告零打扰</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">纯粹的独立开发者工具。无任何后台静默流氓行为、无强制弹窗，把干净的桌面还给你。</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- 底部页脚 -->
-    <footer class="border-t border-slate-900 bg-slate-950 py-8 text-center text-sm text-slate-600">
-        <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>&copy; 2026 SubsPlayer. All rights reserved.</div>
-            <div class="flex gap-6 text-slate-500">
-                <a href="https://github.com/你的用户名/公开仓库名/issues" target="_blank" class="hover:text-slate-400 transition">反馈 Bug / 建议</a>
-                <a href="mailto:your-email@example.com" class="hover:text-slate-400 transition">联系开发者</a>
-            </div>
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-0.5 bg-brand-500/15 border border-brand-500/40 text-white text-xs sm:text-sm font-extrabold tracking-widest">
+            v1.0.0
         </div>
-    </footer>
+    </div>
 
-    <!-- 渲染图标库 -->
-    <script>lucide.createIcons();</script>
+ <p data-i18n="dl_desc" class="text-slate-300 text-sm sm:text-lg md:text-xl max-w-2xl mx-auto font-medium">
+ 适用于 64 位 Windows 系统<br>免费下载使用 即刻分享双语字幕
+ </p>
+ </div><!-- /dl-title -->
+
+  <!-- buttons (rendered dynamically from unified actionButtonsData source) -->
+  <div id="dl-buttons-container" class="grid-cell dl-btns px-4 sm:px-16 py-4 sm:py-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-8 text-center shrink-0"></div>
+
+ <!-- footer -->
+ <div class="grid-cell dl-foot px-8 sm:px-16 pt-3 sm:pt-4 pb-8 sm:pb-12 flex flex-col sm:flex-row items-start justify-between text-sm sm:text-base text-slate-400 gap-3 sm:gap-6 font-semibold shrink-0">
+ <div class="flex items-center text-center sm:text-left leading-none">© 2026 SubsPlayer. All rights reserved.</div>
+ <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 leading-none">
+  <a href="https://t.me/subsplayer" target="_blank" class="hover:text-[#26A5E4] transition flex items-center justify-center gap-2 leading-none">
+    <svg class="w-4 h-4 fill-current text-[#26A5E4] shrink-0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .54-1.43.53-.47-.01-1.37-.26-2.04-.48-.82-.27-1.47-.42-1.42-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.66-2.89 8.01-3.46 3.81-1.6 4.6-1.88 5.12-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
+    <span data-i18n="ft_telegram" class="leading-none">Telegram 群组</span>
+  </a>
+  <a href="https://github.com/TestersNightmare/SubsPlayer" target="_blank" class="group hover:text-white transition flex items-center justify-center gap-2 leading-none">
+    <svg class="w-4 h-4 fill-current text-slate-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.012-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+    <span data-i18n="ft_github" class="leading-none">GitHub 仓库</span>
+  </a>
+  <a href="https://github.com/TestersNightmare/SubsPlayer/releases" target="_blank" class="group hover:text-white transition flex items-center justify-center gap-2 leading-none">
+    <svg class="w-4 h-4 fill-none stroke-current stroke-2 text-slate-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l11 11 10-10L12 2z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
+    <span data-i18n="ft_changelog" class="leading-none">更新日志</span>
+  </a>
+ </div>
+ </div>
+
+ </div><!-- /hero-content -->
+ </div><!-- /fade-content -->
+ </div><!-- /dl-body -->
+</section>
+
+</main>
+
+<!-- ════════════ LIGHTBOX ════════════ -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+ <div class="relative w-full max-w-[94vw] h-full max-h-[92vh] flex flex-col items-center justify-center p-2 sm:p-4" onclick="event.stopPropagation()">
+ <button onclick="closeLightbox()"
+ class="absolute top-3 right-3 text-slate-200 hover:text-white text-xs sm:text-sm font-bold flex items-center gap-2 bg-slate-900/90 hover:bg-black px-3 py-1.5 border border-white/20 z-50 cursor-pointer shadow-xl backdrop-blur-md transition">
+ <i data-lucide="x" class="w-4 h-4"></i> <span data-i18n="lightbox_close">关闭 (Esc)</span>
+ </button>
+ <div class="flex-1 w-full h-full flex items-center justify-center min-h-0 min-w-0 overflow-hidden">
+ <img id="lightbox-img" src="" alt="放大查看"
+ class="w-full h-full object-contain max-w-full max-h-full border-2 border-slate-700/80 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+ </div>
+ <p id="lightbox-caption" class="text-center text-sm sm:text-base text-slate-200 mt-3 font-bold shrink-0 tracking-wide"></p>
+ </div>
+</div>
+
+<script>
+/* ─── Icons ─── */
+if (typeof lucide !== 'undefined' && lucide.createIcons) { try { lucide.createIcons(); } catch(e){} }
+
+/* ─── I18n System ─── */
+const i18nData = {
+  zh: {
+    nav_edit: '字幕编辑',
+    nav_play: '播放工具',
+    nav_bilingual: '双语生产',
+    nav_engine: '智能引擎',
+    nav_download: '现在下载',
+    nav_mobile_dl: '网盘下载',
+    hero_badge: 'SubsPlayer V1.0.0 正式版发布 · 支持 Gemini 多模型翻译引擎',
+    hero_title: '一边播放 一边翻译 <br><span class="text-brand-500">视频播放器</span> +  <span class="text-brand-500">字幕编辑器</span><br>为双语字幕而生',
+    hero_sub: '一分钟自动生成双语字幕，无需四处寻找<br>一键完成全部双语字幕工作流，流畅直观、省时省力',
+    btn_win: '下载 Windows 安装包',
+    btn_baidu: '百度网盘 (提取码: sub8)',
+    btn_telegram: 'Telegram 交流群',
+    f1_badge: '自动生产字幕',
+    f1_title: '没字幕很烦？<br> <span class="text-brand-500">自动生成双语字幕</span><br>立刻追剧 不用等待',
+    f1_desc: '自动提取外文字幕，AI大模型专业翻译<br>自定义双语ASS字幕，自动加载播放<br>打开视频，1 ，2， 3，再也不用四处寻找字幕文件',
+    f2_badge: '高清播放工具',
+    f2_title: '这是一款<br><span class="text-brand-500">现代全功能</span><br>视频播放器',
+    f2_desc: '基于高效的 mpv 原生视听渲染内核构建，现代界面<br>内封字幕和音轨切换，倍速播放，快进快退，外挂字幕位置自定义<br>支持 4K/8K HDR 格式高帧率解码与自定义快捷键操控，帧级控制随心所欲',
+    f3_badge: '双语字幕编辑',
+    f3_title: '<span class="text-brand-500">提取→对齐→翻译<br>→编辑→OCR→特效</span><br>更是一款<br>双语字幕生产力工具',
+    f3_desc: '打通字幕制作全链路 真正的双语字幕生产力平台<br>提取字幕轨道、音频时点对齐、智能格式清洗、双窗口实时编辑预览、设定特效<br> OCR框选硬字幕，1，2，3，翻译完成',
+    f4_badge: '智能模型翻译',
+    f4_title: '只要你想得到<br><span class="text-brand-500">Gemini AI 免费模型</span><br>可生产多种语言双语字幕',
+    f4_desc: '支持自定义更多顶级模型<br>支持中英、中韩、韩英、日中双语<br>为双语字幕而生 为分享而生',
+    dl_desc: '适用于 64 位 Windows 系统<br>免费下载使用 即刻分享双语字幕',
+    ft_telegram: 'Telegram 群组',
+    ft_github: 'GitHub 仓库',
+    ft_changelog: '更新日志',
+    shot_label: '点击放大查看',
+    lightbox_close: '关闭 (Esc)'
+  },
+  en: {
+    nav_edit: 'Editor',
+    nav_play: 'Player',
+    nav_bilingual: 'Bilingual Suite',
+    nav_engine: 'AI Engines',
+    nav_download: 'Download',
+    nav_mobile_dl: 'Download',
+    hero_badge: 'SubsPlayer V1.0.0 Released · Powered by Gemini AI Engine',
+    hero_title: 'Play & Translate Simultaneously<br><span class="text-brand-500">Video Player</span> + <span class="text-brand-500">Subtitle Editor</span><br>Built for Bilingual Subtitles',
+    hero_sub: 'Generate bilingual subtitles automatically in 1 minute.<br>All-in-one subtitle workflow — intuitive, smooth, and effortless.',
+    btn_win: 'Download Windows (Win64)',
+    btn_baidu: 'Baidu Netdisk (Code: sub8)',
+    btn_telegram: 'Telegram Community',
+    f1_badge: 'Auto Subtitles',
+    f1_title: 'Need Subtitles?<br><span class="text-brand-500">Auto Generate Bilingual Subs</span><br>No More Waiting for Anyone',
+    f1_desc: 'Extract foreign subtitles automatically, translated by top AI LLMs.<br>Custom bilingual ASS subtitles auto-loaded into playback.<br>Simple 1-2-3 workflow — no more searching for subtitle files.',
+    f2_badge: 'HD Player',
+    f2_title: 'A Modern <br><span class="text-brand-500">Full-Featured</span><br>Video Player',
+    f2_desc: 'Powered by high-performance MPV rendering engine with a modern UI.<br>Supports audio/subtitle track switching, speed controls, custom position.<br>4K/8K HDR high frame-rate decoding & custom hotkeys for frame-precise control.',
+    f3_badge: 'Subtitle Suite',
+    f3_title: '<span class="text-brand-500">Extract → Align →<br> → Translate → Edit<br> → OCR → Effects</span><br>A True Subtitle Productivity Tool',
+    f3_desc: 'Complete end-to-end subtitle creation workflow.<br>Extract tracks, audio alignment, smart text cleaning, hardsub OCR selection & translation, dual-pane live edit preview.',
+    f4_badge: 'Smart AI LLM',
+    f4_title: 'Unlimited Possibilities<br><span class="text-brand-500">Powered by Gemini AI</span><br>Produce Subtitles for Any Language Pair',
+    f4_desc: 'Supports custom top-tier LLM models.<br>EN-ZH, KO-ZH, JA-ZH and more.<br>Built for bilingual subtitles & easy sharing.',
+    dl_desc: 'For 64-bit Windows Systems<br>Free to download & use — Share bilingual subtitles instantly',
+    ft_telegram: 'Telegram Group',
+    ft_github: 'GitHub Repo',
+    ft_changelog: 'Changelog',
+    shot_label: 'Click to Enlarge',
+    lightbox_close: 'Close (Esc)'
+  },
+  ja: {
+    nav_edit: 'エディター',
+    nav_play: 'プレイヤー',
+    nav_bilingual: 'バイリンガルスイート',
+    nav_engine: 'AIエンジン',
+    nav_download: 'ダウンロード',
+    nav_mobile_dl: 'ダウンロード',
+    hero_badge: 'SubsPlayer V1.0.0 リリース · Gemini AI エンジン搭載',
+    hero_title: '再生と翻訳を同時に実行<br><span class="text-brand-500">動画プレイヤー</span> + <span class="text-brand-500">字幕エディター</span><br>二言語字幕のために開発',
+    hero_sub: '1分で二言語字幕を自動生成<br>オールインワン字幕ワークフロー — 直感的でスムーズ',
+    btn_win: 'Windows版ダウンロード (Win64)',
+    btn_baidu: 'Baidu ネットディスク (コード: sub8)',
+    btn_telegram: 'Telegram コミュニティ',
+    f1_badge: '自動字幕',
+    f1_title: '字幕が必要ですか？<br><span class="text-brand-500">二言語字幕を自動生成</span><br>もう誰の更新も待つ必要はありません',
+    f1_desc: '外国語字幕を自動抽出し、最先端AI LLMで翻訳<br>カスタム二言語ASS字幕を再生時に自動読み込み<br>シンプルな1-2-3手順 — 字幕ファイルを探す手間はゼロ',
+    f2_badge: 'HD プレイヤー',
+    f2_title: 'モダンで<br><span class="text-brand-500">高機能な</span><br>動画プレイヤー',
+    f2_desc: '高性能 mpv レンダリングエンジンとモダンUIを搭載<br>音声・字幕トラック切り替え、速度制御、カスタム位置調整に対応<br>4K/8K HDR高フレームレートデコード＆フレーム単位のショートカット操作',
+    f3_badge: '字幕スイート',
+    f3_title: '<span class="text-brand-500">抽出 → 同期 →<br> → 翻訳 → 編集<br> → OCR → エフェクト</span><br>本格的な字幕生産性ツール',
+    f3_desc: '字幕制作の全工程を完結するワークフロー<br>トラック抽出、音声同期、スマートテキストクリーニング、焼き付け字幕OCR選択翻訳、2画面リアルタイム編集プレビュー',
+    f4_badge: 'スマート AI LLM',
+    f4_title: '無限の可能性<br><span class="text-brand-500">Gemini AI 搭載</span><br>あらゆる言語ペアの字幕を生成',
+    f4_desc: '最高峰のカスタマイズ可能なLLMモデルに対応<br>英語-中国語、韓国語-中国語、日本語-中国語など多数<br>二言語字幕と手軽な共有のために設計',
+    dl_desc: '64ビット Windows OS 対応<br>無料でダウンロードして今すぐ二言語字幕を共有',
+    ft_telegram: 'Telegram グループ',
+    ft_github: 'GitHub リポジトリ',
+    ft_changelog: '更新履歴',
+    shot_label: 'クリックで拡大表示',
+    lightbox_close: '閉じる (Esc)'
+  },
+  ko: {
+    nav_edit: '에디터',
+    nav_play: '플레이어',
+    nav_bilingual: '이중 언어 슈트',
+    nav_engine: 'AI 엔진',
+    nav_download: '다운로드',
+    nav_mobile_dl: '다운로드',
+    hero_badge: 'SubsPlayer V1.0.0 출시 · Gemini AI 엔진 탑재',
+    hero_title: '재생과 번역을 동시에<br><span class="text-brand-500">비디오 플레이어</span> + <span class="text-brand-500">자막 에디터</span><br>이중 언어 자막을 위한 설계',
+    hero_sub: '1분 만에 이중 언어 자막 자동 생성<br>올인원 자막 워크플로우 — 직관적이고 매끄러운 작업',
+    btn_win: 'Windows 다운로드 (Win64)',
+    btn_baidu: '바이두 클라우드 (코드: sub8)',
+    btn_telegram: 'Telegram 커뮤니티',
+    f1_badge: '자동 자막',
+    f1_title: '자막이 필요하신가요?<br><span class="text-brand-500">이중 언어 자막 자동 생성</span><br>더 이상 기다릴 필요 없습니다',
+    f1_desc: '외국어 자막 자동 추출 및 최고 성능 AI LLM 번역<br>사용자 정의 이중 언어 ASS 자막 자동 로드 및 재생<br>간단한 1-2-3 단계 — 자막 파일을 찾아 헤맬 필요 없음',
+    f2_badge: 'HD 플레이어',
+    f2_title: '현대적이고<br><span class="text-brand-500">풀포함 기능을 갖춘</span><br>비디오 플레이어',
+    f2_desc: '고성능 mpv 렌더링 엔진과 모던 UI 기반<br>오디오/자막 트랙 전환, 속도 제어, 사용자 지정 위치 지원<br>4K/8K HDR 고프레임 레이트 디코딩 및 프레임 단위 단축키 컨트롤',
+    f3_badge: '자막 슈트',
+    f3_title: '<span class="text-brand-500">추출 → 동기화 →<br> → 번역 → 편집<br> → OCR → 효과</span><br>진정한 자막 생산성 툴',
+    f3_desc: '완벽한 자막 제작 엔드투엔드 워크플로우<br>트랙 추출, 오디오 동기화, 스마트 텍스트 정제, 하드자막 OCR 영역 선택 번역, 분할 화면 실시간 편집 프리뷰',
+    f4_badge: '스마트 AI LLM',
+    f4_title: '무한한 가능성<br><span class="text-brand-500">Gemini AI 엔진 기반</span><br>모든 언어 쌍 자막 제작 지원',
+    f4_desc: '최고급 프리미엄 LLM 모델 사용자 지정 지원<br>영어-중국어, 한국어-중국어, 일본어-중국어 등 다국어 지원<br>이중 언어 자막 제작과 손쉬운 공유를 위해',
+    dl_desc: '64비트 Windows 시스템 전용<br>무료 다운로드 및 즉시 이중 언어 자막 공유',
+    ft_telegram: 'Telegram 그룹',
+    ft_github: 'GitHub 저장소',
+    ft_changelog: '업데이트 로그',
+    shot_label: '클릭하여 확대',
+    lightbox_close: '닫기 (Esc)'
+  },
+  vi: {
+    nav_edit: 'Trình chỉnh sửa',
+    nav_play: 'Trình phát',
+    nav_bilingual: 'Bộ phụ đề song ngữ',
+    nav_engine: 'Động cơ AI',
+    nav_download: 'Tải về',
+    nav_mobile_dl: 'Tải về',
+    hero_badge: 'SubsPlayer V1.0.0 Phát hành · Tích hợp động cơ Gemini AI',
+    hero_title: 'Vừa phát vừa dịch đồng thời<br><span class="text-brand-500">Trình phát video</span> + <span class="text-brand-500">Trình chỉnh sửa phụ đề</span><br>Thiết kế dành cho phụ đề song ngữ',
+    hero_sub: 'Tự động tạo phụ đề song ngữ trong 1 phút.<br>Quy trình phụ đề tất cả trong một — trực quan, mượt mà và dễ dàng.',
+    btn_win: 'Tải về Windows (Win64)',
+    btn_baidu: 'Baidu Netdisk (Mã: sub8)',
+    btn_telegram: 'Cộng đồng Telegram',
+    f1_badge: 'Phụ đề tự động',
+    f1_title: 'Cần phụ đề?<br><span class="text-brand-500">Tự động tạo phụ đề song ngữ</span><br>Không còn phải chờ đợi bất kỳ ai',
+    f1_desc: 'Tự động trích xuất phụ đề tiếng nước ngoài, dịch bởi AI LLM hàng đầu.<br>Phụ đề ASS song ngữ tùy chỉnh tự động tải vào phát nhạc.<br>Quy trình 1-2-3 đơn giản — không còn phải tìm kiếm tệp phụ đề.',
+    f2_badge: 'Trình phát HD',
+    f2_title: 'Trình phát video<br><span class="text-brand-500">Hiện đại & Đầy đủ tính năng</span>',
+    f2_desc: 'Được vận hành bởi động cơ mpv hiệu năng cao cùng giao diện hiện đại.<br>Hỗ trợ chuyển đổi nhạc/phụ đề, điều khiển tốc độ, vị trí tùy chỉnh.<br>Giải mã 4K/8K HDR tốc độ khung hình cao & phím tắt tùy chỉnh chính xác từng khung hình.',
+    f3_badge: 'Bộ công cụ phụ đề',
+    f3_title: '<span class="text-brand-500">Trích xuất → Đồng bộ →<br> → Dịch → Chỉnh sửa<br> → OCR → Hiệu ứng</span><br>Công cụ năng suất phụ đề thực thụ',
+    f3_desc: 'Quy trình tạo phụ đề hoàn chỉnh từ đầu đến cuối.<br>Trích xuất track, đồng bộ âm thanh, làm sạch văn bản thông minh, chọn vùng OCR phụ đề cứng & dịch, xem trước chỉnh sửa trực tiếp.',
+    f4_badge: 'AI LLM Thông minh',
+    f4_title: 'Khả năng vô tận<br><span class="text-brand-500">Được cung cấp bởi Gemini AI</span><br>Tạo phụ đề cho bất kỳ cặp ngôn ngữ nào',
+    f4_desc: 'Hỗ trợ tùy chỉnh các mô hình LLM hàng đầu.<br>EN-ZH, KO-ZH, JA-ZH và nhiều hơn nữa.<br>Được xây dựng cho phụ đề song ngữ & chia sẻ dễ dàng.',
+    dl_desc: 'Dành cho hệ điều hành Windows 64-bit<br>Tải miễn phí & chia sẻ phụ đề song ngữ ngay lập tức',
+    ft_telegram: 'Nhóm Telegram',
+    ft_github: 'Kho mã GitHub',
+    ft_changelog: 'Nhật ký thay đổi',
+    shot_label: 'Nhấp để phóng to',
+    lightbox_close: 'Đóng (Esc)'
+  },
+  id: {
+    nav_edit: 'Editor',
+    nav_play: 'Pemutar',
+    nav_bilingual: 'Suite Bilingual',
+    nav_engine: 'Mesin AI',
+    nav_download: 'Unduh',
+    nav_mobile_dl: 'Unduh',
+    hero_badge: 'SubsPlayer V1.0.0 Dirilis · Didukung oleh Mesin Gemini AI',
+    hero_title: 'Putar & Terjemahkan Sekaligus<br><span class="text-brand-500">Pemutar Video</span> + <span class="text-brand-500">Editor Subtitle</span><br>Dibuat untuk Subtitle Bilingual',
+    hero_sub: 'Buat subtitle bilingual otomatis dalam 1 menit.<br>Alur kerja subtitle serba ada — intuitif, lancar, dan mudah.',
+    btn_win: 'Unduh Windows (Win64)',
+    btn_baidu: 'Baidu Netdisk (Kode: sub8)',
+    btn_telegram: 'Komunitas Telegram',
+    f1_badge: 'Subtitle Otomatis',
+    f1_title: 'Butuh Subtitle?<br><span class="text-brand-500">Buat Subtitle Bilingual Otomatis</span><br>Tidak Perlu Menunggu Siapa Pun Lagi',
+    f1_desc: 'Ekstrak subtitle asing secara otomatis, diterjemahkan oleh AI LLM teratas.<br>Subtitle ASS bilingual kustom otomatis dimuat ke pemutaran.<br>Alur kerja 1-2-3 mudah — tidak ada lagi pencarian berkas subtitle.',
+    f2_badge: 'Pemutar HD',
+    f2_title: 'Pemutar Video<br><span class="text-brand-500">Modern & Fitur Lengkap</span>',
+    f2_desc: 'Ditenagai oleh mesin render MPV berkinerja tinggi dengan UI modern.<br>Mendukung beralih trek audio/subtitle, kontrol kecepatan, posisi kustom.<br>Dekode 4K/8K HDR frame-rate tinggi & pintasan kustom presisi bingkai.',
+    f3_badge: 'Suite Subtitle',
+    f3_title: '<span class="text-brand-500">Ekstrak → Sinkronkan →<br> → Terjemahkan → Edit<br> → OCR → Efek</span><br>Alat Produktivitas Subtitle Sejati',
+    f3_desc: 'Alur kerja pembuatan subtitle dari ujung ke ujung secara lengkap.<br>Ekstrak trek, sinkronisasi audio, pembersihan teks pintar, seleksi & terjemahan OCR hardsub, pratinjau edit langsung.',
+    f4_badge: 'AI LLM Pintar',
+    f4_title: 'Kemungkinan Tanpa Batas<br><span class="text-brand-500">Ditenagai oleh Gemini AI</span><br>Hasilkan Subtitle untuk Pasangan Bahasa Apa Pun',
+    f4_desc: 'Mendukung model LLM tingkat atas kustom.<br>EN-ZH, KO-ZH, JA-ZH dan banyak lagi.<br>Dibuat untuk subtitle bilingual & berbagi dengan mudah.',
+    dl_desc: 'Untuk Sistem Windows 64-bit<br>Gratis diunduh & digunakan — Bagikan subtitle bilingual secara instan',
+    ft_telegram: 'Grup Telegram',
+    ft_github: 'Repositori GitHub',
+    ft_changelog: 'Catatan Pembaruan',
+    shot_label: 'Klik untuk Memperbesar',
+    lightbox_close: 'Tutup (Esc)'
+  },
+  fr: {
+    nav_edit: 'Éditeur',
+    nav_play: 'Lecteur',
+    nav_bilingual: 'Suite Bilingue',
+    nav_engine: 'Moteurs IA',
+    nav_download: 'Télécharger',
+    nav_mobile_dl: 'Télécharger',
+    hero_badge: 'SubsPlayer V1.0.0 Sorti · Propulsé par le moteur Gemini AI',
+    hero_title: 'Lisez & Traduisez Simultanément<br><span class="text-brand-500">Lecteur Vidéo</span> + <span class="text-brand-500">Éditeur de Sous-titres</span><br>Conçu pour les sous-titres bilingues',
+    hero_sub: 'Générez des sous-titres bilingues automatiquement en 1 minute.<br>Flux de travail tout-en-un — intuitif, fluide et sans effort.',
+    btn_win: 'Télécharger Windows (Win64)',
+    btn_baidu: 'Baidu Netdisk (Code: sub8)',
+    btn_telegram: 'Communauté Telegram',
+    f1_badge: 'Sous-titres Auto',
+    f1_title: 'Besoin de sous-titres ?<br><span class="text-brand-500">Génération automatique bilingue</span><br>N\'attendez plus après qui que ce soit',
+    f1_desc: 'Extraction automatique des sous-titres étrangers et traduction par les meilleurs IA LLM.<br>Sous-titres ASS bilingues personnalisés chargés automatiquement lors de la lecture.<br>Flux 1-2-3 simple — plus besoin de chercher des fichiers de sous-titres.',
+    f2_badge: 'Lecteur HD',
+    f2_title: 'Un Lecteur Vidéo<br><span class="text-brand-500">Moderne & Complet</span>',
+    f2_desc: 'Propulsé par le moteur de rendu MPV haute performance avec une interface moderne.<br>Prise en charge du changement de pistes audio/sous-titres, contrôle de vitesse, position sur mesure.<br>Décodage 4K/8K HDR à fréquence élevée & raccourcis personnalisés pour un contrôle à l\'image près.',
+    f3_badge: 'Suite Sous-titres',
+    f3_title: '<span class="text-brand-500">Extraire → Aligner →<br> → Traduire → Éditer<br> → OCR → Effets</span><br>Un véritable outil de productivité',
+    f3_desc: 'Flux de création de sous-titres complet de bout en bout.<br>Extraction de pistes, alignement audio, nettoyage de texte intelligent, sélection & traduction OCR pour sous-titres incrustés, prévisualisation en direct.',
+    f4_badge: 'IA LLM Intelligente',
+    f4_title: 'Possibilités illimitées<br><span class="text-brand-500">Propulsé par Gemini AI</span><br>Produisez des sous-titres pour toutes les paires de langues',
+    f4_desc: 'Prend en charge des modèles LLM de premier ordre personnalisés.<br>EN-ZH, KO-ZH, JA-ZH et bien plus encore.<br>Conçu pour les sous-titres bilingues et le partage facile.',
+    dl_desc: 'Pour systèmes Windows 64-bit<br>Téléchargement & utilisation gratuits — Partagez des sous-titres bilingues instantanément',
+    ft_telegram: 'Groupe Telegram',
+    ft_github: 'Dépôt GitHub',
+    ft_changelog: 'Notes de version',
+    shot_label: 'Cliquer pour agrandir',
+    lightbox_close: 'Fermer (Esc)'
+  },
+  de: {
+    nav_edit: 'Editor',
+    nav_play: 'Player',
+    nav_bilingual: 'Zweisprachige Suite',
+    nav_engine: 'KI-Engines',
+    nav_download: 'Download',
+    nav_mobile_dl: 'Download',
+    hero_badge: 'SubsPlayer V1.0.0 Veröffentlicht · Angetrieben durch Gemini AI Engine',
+    hero_title: 'Gleichzeitig Abspielen & Übersetzen<br><span class="text-brand-500">Video-Player</span> + <span class="text-brand-500">Untertitel-Editor</span><br>Entwickelt für zweisprachige Untertitel',
+    hero_sub: 'Zweisprachige Untertitel automatisch in 1 Minute erstellen.<br>All-in-One Untertitel-Workflow — intuitiv, nahtlos und mühelos.',
+    btn_win: 'Windows Download (Win64)',
+    btn_baidu: 'Baidu Netdisk (Code: sub8)',
+    btn_telegram: 'Telegram Community',
+    f1_badge: 'Auto-Untertitel',
+    f1_title: 'Untertitel benötigt?<br><span class="text-brand-500">Zweisprachige Untertitel automatisch erstellen</span><br>Kein Warten mehr auf andere',
+    f1_desc: 'Fremdsprachige Untertitel automatisch extrahieren, übersetzt durch Top KI-LLMs.<br>Benutzerdefinierte zweisprachige ASS-Untertitel werden automatisch geladen.<br>Einfacher 1-2-3 Workflow — kein Suchen nach Untertiteldateien mehr.',
+    f2_badge: 'HD-Player',
+    f2_title: 'Ein moderner<br><span class="text-brand-500">Vollwertiger</span><br>Video-Player',
+    f2_desc: 'Angetrieben durch die hochleistungsfähige MPV-Rendering-Engine mit moderner Benutzeroberfläche.<br>Unterstützt Audio-/Untertitelauswahl, Geschwindigkeitssteuerung, benutzerdefinierte Positionen.<br>4K/8K HDR High-Frame-Rate-Dekodierung & eigene Hotkeys für bildgenaue Steuerung.',
+    f3_badge: 'Untertitel-Suite',
+    f3_title: '<span class="text-brand-500">Extrahieren → Sync →<br> → Übersetzen → Editieren<br> → OCR → Effekte</span><br>Ein echtes Produktivitäts-Tool',
+    f3_desc: 'Kompletter End-to-End Workflow zur Untertitel-Erstellung.<br>Spurextraktion, Audio-Synchronisation, intelligente Textbereinigung, Hardsub OCR-Auswahl & Übersetzung, Echtzeit-Vorschau.',
+    f4_badge: 'Smart KI-LLM',
+    f4_title: 'Unbegrenzte Möglichkeiten<br><span class="text-brand-500">Angetrieben durch Gemini AI</span><br>Erstellen Sie Untertitel für jede Sprachkombination',
+    f4_desc: 'Unterstützt benutzerdefinierte Top-Level LLM-Modelle.<br>EN-ZH, KO-ZH, JA-ZH und viele mehr.<br>Entwickelt für zweisprachige Untertitel & einfaches Teilen.',
+    dl_desc: 'Für 64-Bit Windows Systeme<br>Kostenlos herunterladen & nutzen — Zweisprachige Untertitel sofort teilen',
+    ft_telegram: 'Telegram Gruppe',
+    ft_github: 'GitHub Repository',
+    ft_changelog: 'Änderungsprotokoll',
+    shot_label: 'Klicken zum Vergrößern',
+    lightbox_close: 'Schließen (Esc)'
+  },
+  hi: {
+    nav_edit: 'संपादक',
+    nav_play: 'प्लेयर',
+    nav_bilingual: 'द्विभाषी सुइट',
+    nav_engine: 'AI इंजन',
+    nav_download: 'डाउनलोड',
+    nav_mobile_dl: 'डाउनलोड',
+    hero_badge: 'SubsPlayer V1.0.0 जारी · Gemini AI इंजन द्वारा संचालित',
+    hero_title: 'एक साथ प्ले करें और अनुवाद करें<br><span class="text-brand-500">वीडियो प्लेयर</span> + <span class="text-brand-500">सबटाइटल एडिटर</span><br>द्विभाषी सबटाइटल के लिए निर्मित',
+    hero_sub: '1 मिनट में स्वचालित द्विभाषी सबटाइटल बनाएं।<br>ऑल-इन-वन सबटाइटल वर्कफ़्लो — सहज, सुगम और आसान।',
+    btn_win: 'Windows डाउनलोड (Win64)',
+    btn_baidu: 'Baidu नेटडिस्क (कोड: sub8)',
+    btn_telegram: 'Telegram समुदाय',
+    f1_badge: 'ऑटो सबटाइटल',
+    f1_title: 'सबटाइटल चाहिए?<br><span class="text-brand-500">द्विभाषी सबटाइटल स्वतः बनाएं</span><br>अब किसी का इंतजार न करें',
+    f1_desc: 'विदेशी सबटाइटल स्वतः निकालें, शीर्ष AI LLM द्वारा अनुवादित।<br>कस्टम द्विभाषी ASS सबटाइटल प्लेबैक में स्वतः लोड होते हैं।<br>आसान 1-2-3 वर्कफ़्लो — सबटाइटल फ़ाइलें खोजने का कोई झंझट नहीं।',
+    f2_badge: 'HD प्लेयर',
+    f2_title: 'एक आधुनिक<br><span class="text-brand-500">सुविधा संपन्न</span><br>वीडियो प्लेयर',
+    f2_desc: 'आधुनिक UI के साथ उच्च-प्रदर्शन MPV रेंडरिंग इंजन द्वारा संचालित।<br>ऑडियो/सबटाइटल ट्रैक स्विचिंग, स्पीड कंट्रोल, कस्टम पोजीशन का समर्थन।<br>4K/8K HDR डिकोडिंग और फ्रेम-सटीक नियंत्रण के लिए कस्टम शॉर्टकट।',
+    f3_badge: 'सबटाइटल सुइट',
+    f3_title: '<span class="text-brand-500">एक्सट्रैक्ट → सिंक →<br> → अनुवाद → एडिट<br> → OCR → इफेक्ट्स</span><br>एक सच्चा सबटाइटल उत्पादकता टूल',
+    f3_desc: 'संपूर्ण एंड-टू-एंड सबटाइटल निर्माण वर्कफ़्लो।<br>ट्रैक निकालना, ऑडियो सिंक, स्मार्ट टेक्स्ट सफ़ाई, हार्डसब OCR चयन व अनुवाद, लाइव एडिट पूर्वावलोकन।',
+    f4_badge: 'स्मार्ट AI LLM',
+    f4_title: 'असीमित संभावनाएं<br><span class="text-brand-500">Gemini AI द्वारा संचालित</span><br>किसी भी भाषा जोड़ी के लिए सबटाइटल बनाएं',
+    f4_desc: 'कस्टम शीर्ष-स्तरीय LLM मॉडल का समर्थन करता है।<br>EN-ZH, KO-ZH, JA-ZH और बहुत कुछ।<br>द्विभाषी सबटाइटल और आसान शेयरिंग के लिए निर्मित।',
+    dl_desc: '64-बिट Windows सिस्टम के लिए<br>मुफ़्त डाउनलोड करें और तुरंत द्विभाषी सबटाइटल शेयर करें',
+    ft_telegram: 'Telegram समूह',
+    ft_github: 'GitHub रिपॉजिटरी',
+    ft_changelog: 'अपडेट लॉग',
+    shot_label: 'बड़ा करने के लिए क्लिक करें',
+    lightbox_close: 'बंद करें (Esc)'
+  },
+  pt: {
+    nav_edit: 'Editor',
+    nav_play: 'Player',
+    nav_bilingual: 'Suíte Bilingue',
+    nav_engine: 'Motores IA',
+    nav_download: 'Baixar',
+    nav_mobile_dl: 'Baixar',
+    hero_badge: 'SubsPlayer V1.0.0 Lançado · Desenvolvido com Gemini AI Engine',
+    hero_title: 'Reproduza & Traduza Simultaneamente<br><span class="text-brand-500">Reprodutor de Vídeo</span> + <span class="text-brand-500">Editor de Legendas</span><br>Criado para Legendas Bilingues',
+    hero_sub: 'Gere legendas bilingues automaticamente em 1 minuto.<br>Fluxo de trabalho de legendas completo — intuitivo, fluido e sem esforço.',
+    btn_win: 'Baixar Windows (Win64)',
+    btn_baidu: 'Baidu Netdisk (Código: sub8)',
+    btn_telegram: 'Comunidade Telegram',
+    f1_badge: 'Legendas Auto',
+    f1_title: 'Precisa de Legendas?<br><span class="text-brand-500">Geração Automática Bilingue</span><br>Não Espere Mais Por Ninguém',
+    f1_desc: 'Extraia legendas estrangeiras automaticamente, traduzidas pelas melhores IA LLMs.<br>Legendas ASS bilingues personalizadas carregadas automaticamente na reprodução.<br>Fluxo 1-2-3 simples — sem mais procurar arquivos de legenda.',
+    f2_badge: 'Player HD',
+    f2_title: 'Um Reprodutor de Vídeo<br><span class="text-brand-500">Moderno e Completo</span>',
+    f2_desc: 'Desenvolvido sobre o motor mpv de alto desempenho com uma interface moderna.<br>Suporta troca de faixas de áudio/legendas, controle de velocidade e posição personalizada.<br>Decodificação 4K/8K HDR de alta taxa de quadros e atalhos personalizados.',
+    f3_badge: 'Suíte de Legendas',
+    f3_title: '<span class="text-brand-500">Extrair → Sincronizar →<br> → Traduzir → Editar<br> → OCR → Efeitos</span><br>Uma Ferramenta de Produtividade Real',
+    f3_desc: 'Fluxo completo de criação de legendas do início ao fim.<br>Extração de faixas, sincronização de áudio, limpeza inteligente de texto, seleção & tradução OCR, pré-visualização ao vivo.',
+    f4_badge: 'IA LLM Inteligente',
+    f4_title: 'Possibilidades Ilimitadas<br><span class="text-brand-500">Desenvolvido com Gemini AI</span><br>Produza Legendas para Qualquer Par de Idiomas',
+    f4_desc: 'Suporta modelos LLM de alto nível personalizados.<br>EN-ZH, KO-ZH, JA-ZH e muito mais.<br>Criado para legendas bilingues e compartilhamento fácil.',
+    dl_desc: 'Para Sistemas Windows 64-bit<br>Baixe grátis e compartilhe legendas bilingues instantaneamente',
+    ft_telegram: 'Grupo Telegram',
+    ft_github: 'Repositório GitHub',
+    ft_changelog: 'Notas de Atualização',
+    shot_label: 'Clique para ampliar',
+    lightbox_close: 'Fechar (Esc)'
+  },
+  es: {
+    nav_edit: 'Editor',
+    nav_play: 'Reproductor',
+    nav_bilingual: 'Suite Bilingüe',
+    nav_engine: 'Motores IA',
+    nav_download: 'Descargar',
+    nav_mobile_dl: 'Descargar',
+    hero_badge: 'SubsPlayer V1.0.0 Lanzado · Impulsado por Gemini AI Engine',
+    hero_title: 'Reproduce y Traduce Simultáneamente<br><span class="text-brand-500">Reproductor de Video</span> + <span class="text-brand-500">Editor de Subtítulos</span><br>Creado para Subtítulos Bilingües',
+    hero_sub: 'Genera subtítulos bilingües automáticamente en 1 minuto.<br>Flujo de trabajo de subtítulos todo en uno — intuitivo, fluido y sin esfuerzo.',
+    btn_win: 'Descargar Windows (Win64)',
+    btn_baidu: 'Baidu Netdisk (Código: sub8)',
+    btn_telegram: 'Comunidad Telegram',
+    f1_badge: 'Subtítulos Auto',
+    f1_title: '¿Necesitas Subtítulos?<br><span class="text-brand-500">Generación Automática Bilingüe</span><br>No Esperes Más Por Nadie',
+    f1_desc: 'Extrae subtítulos extranjeros automáticamente, traducidos por IA LLMs de primer nivel.<br>Subtítulos ASS bilingües personalizados cargados automáticamente en la reproducción.<br>Flujo 1-2-3 simple — sin más búsquedas de archivos de subtítulos.',
+    f2_badge: 'Reproductor HD',
+    f2_title: 'Un Reproductor de Video<br><span class="text-brand-500">Moderno y Completo</span>',
+    f2_desc: 'Impulsado por el motor de renderizado MPV de alto rendimiento con una interfaz moderna.<br>Soporta cambio de pistas de audio/subtítulos, control de velocidad, posición personalizada.<br>Decodificación 4K/8K HDR de alta tasa de fotogramas y atajos personalizados.',
+    f3_badge: 'Suite de Subtítulos',
+    f3_title: '<span class="text-brand-500">Extraer → Sincronizar →<br> → Traducir → Editar<br> → OCR → Efectos</span><br>Una Herramienta de Productividad Real',
+    f3_desc: 'Flujo completo de creación de subtítulos de principio a fin.<br>Extracción de pistas, sincronización de audio, limpieza inteligente de texto, selección y traducción OCR, vista previa en directo.',
+    f4_badge: 'IA LLM Inteligente',
+    f4_title: 'Posibilidades Ilimitadas<br><span class="text-brand-500">Impulsado por Gemini AI</span><br>Produce Subtítulos para Cualquier Par de Idiomas',
+    f4_desc: 'Soporta modelos LLM de primer nivel personalizados.<br>EN-ZH, KO-ZH, JA-ZH y mucho más.<br>Creado para subtítulos bilingües y compartir fácilmente.',
+    dl_desc: 'Para Sistemas Windows de 64 bits<br>Descarga gratis y comparte subtítulos bilingües al instante',
+    ft_telegram: 'Grupo Telegram',
+    ft_github: 'Repositorio GitHub',
+    ft_changelog: 'Notas de Actualización',
+    shot_label: 'Haz clic para ampliar',
+    lightbox_close: 'Cerrar (Esc)'
+  }
+};
+
+let currentLang = 'zh';
+
+const langDisplayNames = {
+  zh: '简体中文',
+  en: 'English',
+  ja: '日本語',
+  ko: '한국어',
+  vi: 'Tiếng Việt',
+  id: 'Bahasa Indonesia',
+  fr: 'Français',
+  de: 'Deutsch',
+  hi: 'हिन्दी',
+  pt: 'Português',
+  es: 'Español'
+};
+
+/* ─── Unified Action Buttons Component ─── */
+const actionButtonsData = [
+  {
+    id: 'btn-win',
+    key: 'btn_win',
+    url: 'https://github.com/TestersNightmare/SubsPlayer/releases',
+    bg: 'bg-gradient-to-r from-[#4F8CFF] to-[#3A76E8] hover:from-[#3A76E8] hover:to-[#2860D4] border border-blue-400/40 text-white shadow-[0_0_30px_rgba(79,140,255,0.45)] hover:shadow-[0_0_40px_rgba(79,140,255,0.65)] hover:scale-[1.02]',
+    icon: `<svg class="w-5 h-5 sm:w-7 sm:h-7 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+  },
+  {
+    id: 'btn-baidu',
+    key: 'btn_baidu',
+    url: 'https://pan.baidu.com/s/placeholder_subsplayer',
+    bg: 'bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white backdrop-blur-md hover:scale-[1.02]',
+    icon: `<svg class="w-5 h-5 sm:w-7 sm:h-7 fill-none stroke-current stroke-2 shrink-0 text-cyan-400" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>`
+  },
+  {
+    id: 'btn-telegram',
+    key: 'btn_telegram',
+    url: 'https://t.me/subsplayer',
+    bg: 'bg-[#26A5E4]/20 hover:bg-[#26A5E4]/35 border border-[#26A5E4]/50 hover:border-[#26A5E4] text-white shadow-[0_0_25px_rgba(38,165,228,0.25)] hover:shadow-[0_0_35px_rgba(38,165,228,0.5)] hover:scale-[1.02]',
+    icon: `<svg class="w-5 h-5 sm:w-7 sm:h-7 fill-current shrink-0 text-[#26A5E4]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .54-1.43.53-.47-.01-1.37-.26-2.04-.48-.82-.27-1.47-.42-1.42-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.66-2.89 8.01-3.46 3.81-1.6 4.6-1.88 5.12-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>`
+  }
+];
+
+function renderActionButtons(containerId, isHero = false) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const dict = i18nData[currentLang] || i18nData.zh;
+  const sizeClasses = isHero 
+    ? 'px-5 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-bold'
+    : 'px-6 sm:px-10 py-3.5 sm:py-4 text-base sm:text-lg font-extrabold';
+
+  container.innerHTML = actionButtonsData.map(btn => `
+    <a href="${btn.url}" target="_blank"
+       class="w-full max-w-[320px] xs:max-w-[360px] sm:w-auto sm:max-w-none inline-flex items-center justify-center gap-2.5 ${sizeClasses} ${btn.bg} transition-all duration-300 transform rounded-none">
+      ${btn.icon}
+      <span data-i18n="${btn.key}">${dict[btn.key] || ''}</span>
+    </a>
+  `).join('');
+}
+
+function renderAllActionButtons() {
+  renderActionButtons('hero-buttons-container', true);
+  renderActionButtons('dl-buttons-container', false);
+}
+
+function toggleLangDropdown(e) {
+  if (e) {
+    if (e.stopPropagation) e.stopPropagation();
+  }
+  const menu = document.getElementById('lang-menu');
+  if (menu) {
+    menu.classList.toggle('hidden');
+  }
+}
+
+function selectLang(lang) {
+  setLanguage(lang);
+  const menu = document.getElementById('lang-menu');
+  if (menu) menu.classList.add('hidden');
+}
+
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('lang-dropdown-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const menu = document.getElementById('lang-menu');
+    if (menu) menu.classList.add('hidden');
+  }
+});
+
+function getInitialLanguage() {
+  const saved = localStorage.getItem('subsplayer_lang');
+  if (saved && i18nData[saved]) return saved;
+  const sysLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  if (sysLang.startsWith('zh')) return 'zh';
+  if (sysLang.startsWith('ja')) return 'ja';
+  if (sysLang.startsWith('ko')) return 'ko';
+  if (sysLang.startsWith('vi')) return 'vi';
+  if (sysLang.startsWith('id')) return 'id';
+  if (sysLang.startsWith('fr')) return 'fr';
+  if (sysLang.startsWith('de')) return 'de';
+  if (sysLang.startsWith('hi')) return 'hi';
+  if (sysLang.startsWith('pt')) return 'pt';
+  if (sysLang.startsWith('es')) return 'es';
+  return 'en';
+}
+
+function setLanguage(lang) {
+  if (!i18nData[lang]) lang = 'zh';
+  currentLang = lang;
+  localStorage.setItem('subsplayer_lang', lang);
+  document.documentElement.lang = lang;
+
+  const dict = i18nData[lang] || i18nData.zh;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      if (key === 'hero_title') {
+        const rawLines = dict[key].split('<br>');
+        el.innerHTML = rawLines.map(line => `<span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis">${line}</span>`).join('');
+      } else {
+        el.innerHTML = dict[key];
+      }
+    }
+  });
+
+  renderAllActionButtons();
+
+  const nameEl = document.getElementById('current-lang-name');
+  if (nameEl && langDisplayNames[lang]) {
+    nameEl.textContent = langDisplayNames[lang];
+  }
+}
+
+// Script runs at end of body — DOM is already ready; no need to wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setLanguage(getInitialLanguage());
+  });
+} else {
+  setLanguage(getInitialLanguage());
+}
+
+/* ─── Lightbox ─── */
+function openLightbox(src, capKey) {
+  document.getElementById('lightbox-img').src = src;
+  const dict = i18nData[currentLang] || i18nData.zh;
+  const captionText = dict[capKey] || capKey;
+  document.getElementById('lightbox-caption').innerText = captionText;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
+
+/* ─── Scroll-snap fade ─── */
+const snapObs = new IntersectionObserver(entries => {
+ entries.forEach(e => e.target.classList.toggle('active', e.isIntersecting));
+}, { threshold: 0.4 });
+document.querySelectorAll('.full-page-section').forEach(s => snapObs.observe(s));
+
+/* ═══════════════════════════════════════════════════════════════
+ BING DAILY WALLPAPER
+ Fetches 6 different landscape photos (idx 0-5) from Bing's
+ public JSON API and applies them as full-screen section bgs.
+ Falls back to dark colour silently if network/CORS fails.
+ ═══════════════════════════════════════════════════════════════ */
+async function loadBingWallpapers() {
+ try {
+ const r = await fetch(
+ 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=6&mkt=zh-CN',
+ { mode: 'cors' }
+ );
+ if (!r.ok) throw new Error('non-200');
+ const d = await r.json();
+ const imgs = d.images || [];
+ document.querySelectorAll('.section-bg[data-bing-idx]').forEach(bg => {
+ const idx = parseInt(bg.dataset.bingIdx, 10);
+ if (imgs[idx]) {
+ let url = imgs[idx].url.replace(/_\d+x\d+/, '_1920x1080');
+ if (!url.startsWith('http')) url = 'https://www.bing.com' + url;
+ bg.style.backgroundImage = `url('${url}')`;
+ }
+ });
+ if (imgs[0]?.copyright) {
+ const el = document.getElementById('bing-credit');
+ if (el) el.textContent = '© ' + imgs[0].copyright;
+ }
+ } catch(e) {
+ console.info('Bing wallpaper unavailable.', e);
+ }
+}
+loadBingWallpapers();
+
+/* ═══════════════════════════════════════════════════════════════
+ TAILWIND-STYLE ELEMENT-EDGE GRID LINES
+ ───────────────────────────────────────────────────────────────
+ Core principle (matches tailwindcss.com):
+ Every .grid-cell element has its OWN CSS border (the tight box
+ hugging the component). The canvas then reads each element's
+ bounding rect and extends its four edges as infinite lines
+ across the full viewport — exactly what tailwindcss.com does.
+
+ Applied to: column panels, badge rows, heading blocks,
+ description blocks, hero sections, dl blocks.
+ NOT applied to: nav links, buttons, images individually.
+
+ Deduplication: edges within 2px are merged so shared walls
+ between adjacent cells never double-draw.
+
+ Canvas is FIXED (viewport coords), redrawn on resize and
+ whenever a new snap section becomes visible.
+ ═══════════════════════════════════════════════════════════════ */
+const cnv = document.getElementById('grid-canvas');
+const ctx = cnv.getContext('2d');
+const LC = 'rgba(255,255,255,0.09)';
+const DUP = 2;
+
+function dedupe(arr) {
+ arr.sort((a,b)=>a-b);
+ return arr.filter((v,i) => i===0 || v-arr[i-1] > DUP);
+}
+
+function drawGrid() {
+ const W = window.innerWidth;
+ const H = window.innerHeight;
+ const dpr = window.devicePixelRatio || 1;
+
+ cnv.width = Math.round(W * dpr);
+ cnv.height = Math.round(H * dpr);
+ cnv.style.width = W + 'px';
+ cnv.style.height = H + 'px';
+ ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ ctx.clearRect(0, 0, W, H);
+
+ const hY = [];
+ const vX = [];
+
+ /* Header bottom edge */
+ const hdr = document.getElementById('site-header');
+ if (hdr) hY.push(hdr.getBoundingClientRect().bottom);
+
+  /* ── Only read .grid-cell elements inside the CURRENTLY ACTIVE section.
+     This is the key fix for ghost lines: instead of trying to filter by
+     viewport coords (timing-sensitive during snap animation), we scope
+     entirely to the section that IntersectionObserver has declared active.
+     The .active class is added/removed at threshold=0.4 — reliable and
+     section-isolated, so other sections' column dividers NEVER appear. ── */
+  const activeSection = document.querySelector('.full-page-section.active');
+  if (!activeSection) { ctx.clearRect(0, 0, W, H); return; }
+
+  activeSection.querySelectorAll('.grid-cell').forEach(el => {
+    const r = el.getBoundingClientRect();
+    hY.push(r.top, r.bottom);
+    vX.push(r.left, r.right);
+  });
+
+ const uH = dedupe(hY);
+ const uV = dedupe(vX);
+
+ ctx.lineWidth = 1;
+ ctx.strokeStyle = LC;
+
+ /* Horizontal lines: full viewport width at each element top/bottom */
+ uH.forEach(y => {
+ const py = Math.round(y) + 0.5;
+ ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+ });
+
+ /* Vertical lines: full viewport height at each element left/right */
+ uV.forEach(x => {
+ const px = Math.round(x) + 0.5;
+ ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+ });
+}
+
+let raf = null;
+function scheduleGrid() {
+ if (raf) return;
+ raf = requestAnimationFrame(() => { raf = null; drawGrid(); });
+}
+
+window.addEventListener('resize', scheduleGrid);
+
+/* ═══════════════════════════════════════════════════════════════
+ SCROLL REDRAW — why previous approach failed:
+ scroll-snap-type is on <html>, so scroll events bubble to
+ window — NOT document.documentElement. The previous listener
+ on documentElement never fired, leaving stale canvas lines.
+
+ Fix: run a continuous rAF loop for the duration of each scroll
+ animation so the canvas always reflects live element positions.
+ ═══════════════════════════════════════════════════════════════ */
+let scrolling = false;
+let scrollLoopId = null;
+let scrollEndTimer = null;
+
+function runScrollLoop() {
+ drawGrid();
+ if (scrolling) {
+ scrollLoopId = requestAnimationFrame(runScrollLoop);
+ } else {
+ scrollLoopId = null;
+ drawGrid(); // one final clean draw after animation ends
+ }
+}
+
+function onScroll() {
+ scrolling = true;
+ if (!scrollLoopId) {
+ scrollLoopId = requestAnimationFrame(runScrollLoop);
+ }
+ // detect scroll stop (snap animation complete)
+ clearTimeout(scrollEndTimer);
+ scrollEndTimer = setTimeout(() => {
+ scrolling = false;
+ }, 240);
+}
+
+// window catches scroll-snap events; document capture catches everything else
+window.addEventListener('scroll', onScroll, { passive: true });
+document.addEventListener('scroll', onScroll, { passive: true, capture: true });
+
+// scrollend: definitive settle event (Chrome 114+, Firefox 109+)
+window.addEventListener('scrollend', () => {
+ scrolling = false;
+ drawGrid();
+}, { passive: true });
+
+/* Initial draws */
+setTimeout(drawGrid, 100);
+setTimeout(drawGrid, 600);
+
+/* ─── MutationObserver: most reliable section-change trigger ───
+   The fade IntersectionObserver (threshold 0.4) adds/removes the
+   .active class when a section is 40%+ in view. That moment is
+   well into the snap animation, so a small delay gives us the
+   fully-settled position for a clean final redraw.            */
+const mutObs = new MutationObserver(() => {
+    drawGrid();           // immediate pass (mid-animation)
+    setTimeout(drawGrid, 180);  // settled pass
+    setTimeout(drawGrid, 420);  // safety pass
+});
+document.querySelectorAll('.full-page-section').forEach(sec => {
+    mutObs.observe(sec, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
 </body>
 </html>
