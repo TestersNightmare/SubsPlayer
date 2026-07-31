@@ -30,6 +30,7 @@
  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
  <script src="https://cdn.tailwindcss.com"></script>
  <script src="https://unpkg.com/lucide@latest"></script>
+ <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
  <script>
  tailwind.config = {
  darkMode: 'class',
@@ -307,6 +308,108 @@
      border-radius: 0;
    }
  }
+
+ /* ── 安装教程浮层（README 片段）── */
+ #guide-modal {
+   display: none;
+   position: fixed;
+   inset: 0;
+   z-index: 210;
+   background: rgba(4, 6, 12, 0.82);
+   backdrop-filter: blur(16px);
+   -webkit-backdrop-filter: blur(16px);
+   align-items: center;
+   justify-content: center;
+   padding: 1rem;
+   box-sizing: border-box;
+ }
+ #guide-modal.open { display: flex; }
+ #guide-panel {
+   width: min(92vw, 44rem);
+   max-height: min(84vh, 40rem);
+   background: rgba(17, 24, 39, 0.96);
+   border: 1px solid rgba(255, 255, 255, 0.14);
+   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+   display: flex;
+   flex-direction: column;
+   overflow: hidden;
+ }
+ #guide-panel-header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 1rem;
+   padding: 0.9rem 1.1rem;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+   flex-shrink: 0;
+ }
+ #guide-body {
+   padding: 1rem 1.15rem 1.35rem;
+   overflow-y: auto;
+   -webkit-overflow-scrolling: touch;
+   text-align: left;
+   font-weight: 400;
+   color: #cbd5e1;
+   font-size: 0.9rem;
+   line-height: 1.65;
+ }
+ #guide-body h1, #guide-body h2, #guide-body h3, #guide-body h4 {
+   color: #f8fafc;
+   font-weight: 800;
+   margin: 1.15em 0 0.45em;
+   letter-spacing: 0.01em;
+ }
+ #guide-body h2 { font-size: 1.15rem; color: #4F8CFF; }
+ #guide-body h3 { font-size: 1.02rem; }
+ #guide-body p { margin: 0.55em 0; }
+ #guide-body ul, #guide-body ol { margin: 0.45em 0 0.7em; padding-left: 1.25rem; }
+ #guide-body li { margin: 0.28em 0; }
+ #guide-body a { color: #4F8CFF; text-decoration: underline; text-underline-offset: 2px; }
+ #guide-body a:hover { color: #00F2FE; }
+ #guide-body blockquote {
+   margin: 0.7em 0;
+   padding: 0.55rem 0.85rem;
+   border-left: 3px solid #4F8CFF;
+   background: rgba(79, 140, 255, 0.08);
+   color: #e2e8f0;
+ }
+ #guide-body code {
+   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+   font-size: 0.82em;
+   background: rgba(255, 255, 255, 0.06);
+   padding: 0.1em 0.35em;
+   border: 1px solid rgba(255, 255, 255, 0.08);
+ }
+ #guide-body pre {
+   margin: 0.7em 0;
+   padding: 0.75rem 0.9rem;
+   overflow-x: auto;
+   background: rgba(0, 0, 0, 0.35);
+   border: 1px solid rgba(255, 255, 255, 0.1);
+ }
+ #guide-body pre code {
+   background: none;
+   border: 0;
+   padding: 0;
+   font-size: 0.8rem;
+ }
+ #guide-body hr {
+   border: 0;
+   border-top: 1px solid rgba(255, 255, 255, 0.1);
+   margin: 1.1em 0;
+ }
+ #guide-body table {
+   width: 100%;
+   border-collapse: collapse;
+   margin: 0.8em 0;
+   font-size: 0.82rem;
+ }
+ #guide-body th, #guide-body td {
+   border: 1px solid rgba(255, 255, 255, 0.12);
+   padding: 0.4rem 0.55rem;
+   vertical-align: top;
+ }
+ #guide-body th { background: rgba(79, 140, 255, 0.12); color: #fff; }
 
  /* ── Fade animations ── */
  .fade-content {
@@ -706,6 +809,12 @@
     <svg class="w-4 h-4 fill-none stroke-current stroke-2 text-slate-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l11 11 10-10L12 2z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
     <span data-i18n="ft_changelog" class="leading-none">更新日志</span>
   </a>
+  <!-- Install guide from README -->
+  <button type="button" onclick="openGuideModal(event)" id="guide-menu-btn"
+    class="group hover:text-white transition flex items-center justify-center gap-2 leading-none cursor-pointer bg-transparent border-0 p-0 font-semibold text-sm sm:text-base text-slate-400">
+    <svg class="w-4 h-4 fill-none stroke-current stroke-2 text-slate-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
+    <span data-i18n="ft_guide" class="leading-none">安装教程</span>
+  </button>
   <!-- What You Need to Know — secondary dropdown -->
   <div class="relative inline-block text-left" id="terms-dropdown-wrap">
     <button type="button" onclick="toggleTermsDropdown(event)" id="terms-menu-btn"
@@ -736,6 +845,25 @@
 </section>
 
 </main>
+
+<!-- ════════════ INSTALL GUIDE (README) ════════════ -->
+<div id="guide-modal" onclick="closeGuideModal()">
+  <div id="guide-panel" role="dialog" aria-modal="true" aria-labelledby="guide-title"
+       onclick="event.stopPropagation()">
+    <div id="guide-panel-header">
+      <h3 id="guide-title" data-i18n="guide_title"
+          class="text-white text-base sm:text-lg font-extrabold tracking-wide m-0">安装与使用教程</h3>
+      <button type="button" onclick="closeGuideModal()"
+              class="text-slate-300 hover:text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 bg-transparent hover:bg-white/10 px-2.5 py-1.5 border border-white/15 cursor-pointer transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+        <span data-i18n="lightbox_close">关闭 (Esc)</span>
+      </button>
+    </div>
+    <div id="guide-body" data-i18n-skip>
+      <p class="text-slate-400" data-i18n="guide_loading">正在加载教程…</p>
+    </div>
+  </div>
+</div>
 
 <!-- ════════════ LIGHTBOX ════════════ -->
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
@@ -788,7 +916,11 @@ const i18nData = {
     ft_telegram: 'Telegram 群组',
     ft_github: 'GitHub 仓库',
     ft_changelog: '更新日志',
+    ft_guide: '安装教程',
     ft_terms: '使用须知',
+    guide_title: '安装与使用教程',
+    guide_loading: '正在加载教程…',
+    guide_fail: '无法加载教程。请稍后重试，或前往 GitHub README 查看。',
     terms_title: '使用须知',
     terms_body: '<li>SubsPlayer 保留所有权利。</li><li>下载并使用本软件，即表示您同意将自动翻译结果及视频内封字幕与其他用户共享；如不同意，请勿使用本软件。</li><li>感谢 Google 提供免费 API。本软件不会分享您的 API Key；开发者自备付费 API。</li><li>严禁商业用途。</li><li>请遵守当地法律法规。</li><li>技术无罪，开源万岁！</li>',
     shot_label: '点击放大查看',
@@ -824,7 +956,11 @@ const i18nData = {
     ft_telegram: 'Telegram Group',
     ft_github: 'GitHub Repo',
     ft_changelog: 'Changelog',
+    ft_guide: 'Install Guide',
     ft_terms: 'Terms',
+    guide_title: 'Install & Use Guide',
+    guide_loading: 'Loading guide…',
+    guide_fail: 'Could not load the guide. Try again later or open the GitHub README.',
     terms_title: 'What You Need to Know',
     terms_body: '<li>All rights reserved by SubsPlayer.</li><li>By downloading and using this software, you agree to share automatic translation results and subtitle files embedded in videos with other users. If you object to this, please do not use this software.</li><li>Thank you to Google for providing the free API. This software will not share your API key; I have my own paid API.</li><li>Commercial use is strictly prohibited.</li><li>Please comply with local laws and regulations.</li><li>Technology is innocent. Long live open source!</li>',
     shot_label: 'Click to Enlarge',
@@ -860,7 +996,11 @@ const i18nData = {
     ft_telegram: 'Telegram グループ',
     ft_github: 'GitHub リポジトリ',
     ft_changelog: '更新履歴',
+    ft_guide: 'インストールガイド',
     ft_terms: '利用上の注意',
+    guide_title: 'インストールと使い方',
+    guide_loading: 'ガイドを読み込み中…',
+    guide_fail: 'ガイドを読み込めませんでした。後でもう一度お試しいただくか、GitHub README をご覧ください。',
     terms_title: '知っておくべきこと',
     terms_body: '<li>SubsPlayer はすべての権利を保有します。</li><li>本ソフトウェアをダウンロードして使用することで、自動翻訳結果および動画に埋め込まれた字幕を他のユーザーと共有することに同意したものとみなします。同意されない場合はご利用くださいません。</li><li>無料 API を提供する Google に感謝します。本ソフトウェアは API キーを共有しません。開発者は独自の有料 API を使用しています。</li><li>商用利用は固く禁じられています。</li><li>現地の法令を遵守してください。</li><li>技術に罪はない。オープンソース万歳！</li>',
     shot_label: 'クリックで拡大表示',
@@ -896,7 +1036,11 @@ const i18nData = {
     ft_telegram: 'Telegram 그룹',
     ft_github: 'GitHub 저장소',
     ft_changelog: '업데이트 로그',
+    ft_guide: '설치 가이드',
     ft_terms: '이용 안내',
+    guide_title: '설치 및 사용 가이드',
+    guide_loading: '가이드 불러오는 중…',
+    guide_fail: '가이드를 불러오지 못했습니다. 나중에 다시 시도하거나 GitHub README를 확인하세요.',
     terms_title: '꼭 알아두세요',
     terms_body: '<li>SubsPlayer는 모든 권리를 보유합니다.</li><li>본 소프트웨어를 다운로드하고 사용하면 자동 번역 결과 및 영상에 내장된 자막을 다른 사용자와 공유하는 데 동의한 것으로 간주됩니다. 동의하지 않으시면 사용하지 마십시오.</li><li>무료 API를 제공하는 Google에 감사드립니다. 본 소프트웨어는 API 키를 공유하지 않으며, 개발자는 유료 API를 사용합니다.</li><li>상업적 사용은 엄격히 금지됩니다.</li><li>현지 법률과 규정을 준수하십시오.</li><li>기술은 무죄입니다. 오픈 소스 만세!</li>',
     shot_label: '클릭하여 확대',
@@ -932,7 +1076,11 @@ const i18nData = {
     ft_telegram: 'Nhóm Telegram',
     ft_github: 'Kho mã GitHub',
     ft_changelog: 'Nhật ký thay đổi',
+    ft_guide: 'Hướng dẫn cài đặt',
     ft_terms: 'Điều khoản',
+    guide_title: 'Hướng dẫn cài đặt & sử dụng',
+    guide_loading: 'Đang tải hướng dẫn…',
+    guide_fail: 'Không tải được hướng dẫn. Thử lại sau hoặc xem README trên GitHub.',
     terms_title: 'Những điều cần biết',
     terms_body: '<li>Mọi quyền thuộc về SubsPlayer.</li><li>Bằng việc tải và sử dụng phần mềm này, bạn đồng ý chia sẻ kết quả dịch tự động và phụ đề nhúng trong video với người dùng khác. Nếu không đồng ý, vui lòng không sử dụng.</li><li>Cảm ơn Google đã cung cấp API miễn phí. Phần mềm này không chia sẻ API key của bạn; tôi dùng API trả phí của riêng mình.</li><li>Nghiêm cấm sử dụng thương mại.</li><li>Vui lòng tuân thủ luật pháp và quy định địa phương.</li><li>Công nghệ vô tội. Vạn tuế mã nguồn mở!</li>',
     shot_label: 'Nhấp để phóng to',
@@ -968,7 +1116,11 @@ const i18nData = {
     ft_telegram: 'Grup Telegram',
     ft_github: 'Repositori GitHub',
     ft_changelog: 'Catatan Pembaruan',
+    ft_guide: 'Panduan Instalasi',
     ft_terms: 'Ketentuan',
+    guide_title: 'Panduan Instalasi & Penggunaan',
+    guide_loading: 'Memuat panduan…',
+    guide_fail: 'Gagal memuat panduan. Coba lagi nanti atau buka README di GitHub.',
     terms_title: 'Yang Perlu Anda Ketahui',
     terms_body: '<li>Semua hak dilindungi oleh SubsPlayer.</li><li>Dengan mengunduh dan menggunakan perangkat lunak ini, Anda setuju untuk berbagi hasil terjemahan otomatis dan file subtitle yang tertanam dalam video dengan pengguna lain. Jika keberatan, jangan gunakan perangkat lunak ini.</li><li>Terima kasih kepada Google atas API gratis. Perangkat lunak ini tidak akan membagikan API key Anda; saya menggunakan API berbayar sendiri.</li><li>Penggunaan komersial dilarang keras.</li><li>Harap patuhi hukum dan peraturan setempat.</li><li>Teknologi tidak bersalah. Hidup open source!</li>',
     shot_label: 'Klik untuk Memperbesar',
@@ -1004,7 +1156,11 @@ const i18nData = {
     ft_telegram: 'Groupe Telegram',
     ft_github: 'Dépôt GitHub',
     ft_changelog: 'Notes de version',
+    ft_guide: 'Guide d\'installation',
     ft_terms: 'Mentions',
+    guide_title: 'Guide d\'installation et d\'utilisation',
+    guide_loading: 'Chargement du guide…',
+    guide_fail: 'Impossible de charger le guide. Réessayez plus tard ou ouvrez le README GitHub.',
     terms_title: 'Ce qu\'il faut savoir',
     terms_body: '<li>Tous droits réservés par SubsPlayer.</li><li>En téléchargeant et en utilisant ce logiciel, vous acceptez de partager les résultats de traduction automatique et les sous-titres intégrés aux vidéos avec d\'autres utilisateurs. Si vous vous y opposez, n\'utilisez pas ce logiciel.</li><li>Merci à Google pour l\'API gratuite. Ce logiciel ne partagera pas votre clé API ; j\'utilise ma propre API payante.</li><li>L\'usage commercial est strictement interdit.</li><li>Veuillez respecter les lois et réglementations locales.</li><li>La technologie est innocente. Vive l\'open source !</li>',
     shot_label: 'Cliquer pour agrandir',
@@ -1040,7 +1196,11 @@ const i18nData = {
     ft_telegram: 'Telegram Gruppe',
     ft_github: 'GitHub Repository',
     ft_changelog: 'Änderungsprotokoll',
+    ft_guide: 'Installationsanleitung',
     ft_terms: 'Hinweise',
+    guide_title: 'Installation & Nutzung',
+    guide_loading: 'Anleitung wird geladen…',
+    guide_fail: 'Anleitung konnte nicht geladen werden. Später erneut versuchen oder GitHub-README öffnen.',
     terms_title: 'Was Sie wissen müssen',
     terms_body: '<li>Alle Rechte vorbehalten von SubsPlayer.</li><li>Durch das Herunterladen und Nutzen dieser Software stimmen Sie zu, automatische Übersetzungsergebnisse und in Videos eingebettete Untertitel mit anderen Nutzern zu teilen. Wenn Sie dem widersprechen, verwenden Sie diese Software bitte nicht.</li><li>Danke an Google für die kostenlose API. Diese Software gibt Ihren API-Schlüssel nicht weiter; ich nutze meine eigene kostenpflichtige API.</li><li>Kommerzielle Nutzung ist streng untersagt.</li><li>Bitte halten Sie sich an lokale Gesetze und Vorschriften.</li><li>Technik ist unschuldig. Es lebe Open Source!</li>',
     shot_label: 'Klicken zum Vergrößern',
@@ -1076,7 +1236,11 @@ const i18nData = {
     ft_telegram: 'Telegram समूह',
     ft_github: 'GitHub रिपॉजिटरी',
     ft_changelog: 'अपडेट लॉग',
+    ft_guide: 'इंस्टॉल गाइड',
     ft_terms: 'नियम',
+    guide_title: 'इंस्टॉल और उपयोग गाइड',
+    guide_loading: 'गाइड लोड हो रही है…',
+    guide_fail: 'गाइड लोड नहीं हो सकी। बाद में पुनः प्रयास करें या GitHub README देखें।',
     terms_title: 'आपको क्या जानना चाहिए',
     terms_body: '<li>सभी अधिकार SubsPlayer के पास सुरक्षित हैं।</li><li>इस सॉफ़्टवेयर को डाउनलोड और उपयोग करके, आप स्वचालित अनुवाद परिणामों और वीडियो में एम्बेडेड सबटाइटल फ़ाइलों को अन्य उपयोगकर्ताओं के साथ साझा करने के लिए सहमत होते हैं। यदि आप सहमत नहीं हैं, तो कृपया इसका उपयोग न करें।</li><li>मुफ़्त API प्रदान करने के लिए Google का धन्यवाद। यह सॉफ़्टवेयर आपकी API कुंजी साझा नहीं करेगा; मेरे पास अपना भुगतान किया गया API है।</li><li>व्यावसायिक उपयोग सख्त रूप से निषिद्ध है।</li><li>कृपया स्थानीय कानूनों और नियमों का पालन करें।</li><li>तकनीक निर्दोष है। ओपन सोर्स अमर रहे!</li>',
     shot_label: 'बड़ा करने के लिए क्लिक करें',
@@ -1112,7 +1276,11 @@ const i18nData = {
     ft_telegram: 'Grupo Telegram',
     ft_github: 'Repositório GitHub',
     ft_changelog: 'Notas de Atualização',
+    ft_guide: 'Guia de Instalação',
     ft_terms: 'Avisos',
+    guide_title: 'Guia de Instalação e Uso',
+    guide_loading: 'Carregando guia…',
+    guide_fail: 'Não foi possível carregar o guia. Tente novamente ou abra o README no GitHub.',
     terms_title: 'O que você precisa saber',
     terms_body: '<li>Todos os direitos reservados por SubsPlayer.</li><li>Ao baixar e usar este software, você concorda em compartilhar resultados de tradução automática e arquivos de legendas incorporados em vídeos com outros usuários. Se discordar, não use este software.</li><li>Agradecemos ao Google pela API gratuita. Este software não compartilhará sua chave de API; eu uso minha própria API paga.</li><li>O uso comercial é estritamente proibido.</li><li>Cumpra as leis e regulamentos locais.</li><li>A tecnologia é inocente. Viva o open source!</li>',
     shot_label: 'Clique para ampliar',
@@ -1148,7 +1316,11 @@ const i18nData = {
     ft_telegram: 'Grupo Telegram',
     ft_github: 'Repositorio GitHub',
     ft_changelog: 'Notas de Actualización',
+    ft_guide: 'Guía de Instalación',
     ft_terms: 'Avisos',
+    guide_title: 'Guía de Instalación y Uso',
+    guide_loading: 'Cargando guía…',
+    guide_fail: 'No se pudo cargar la guía. Inténtelo más tarde o abra el README en GitHub.',
     terms_title: 'Lo que debes saber',
     terms_body: '<li>Todos los derechos reservados por SubsPlayer.</li><li>Al descargar y usar este software, aceptas compartir los resultados de traducción automática y los subtítulos incrustados en los vídeos con otros usuarios. Si no estás de acuerdo, no uses este software.</li><li>Gracias a Google por proporcionar la API gratuita. Este software no compartirá tu clave API; yo uso mi propia API de pago.</li><li>El uso comercial está estrictamente prohibido.</li><li>Cumple las leyes y normativas locales.</li><li>La tecnología es inocente. ¡Larga vida al open source!</li>',
     shot_label: 'Haz clic para ampliar',
@@ -1281,6 +1453,83 @@ function selectLang(lang) {
   setLanguage(lang);
   const menu = document.getElementById('lang-menu');
   if (menu) menu.classList.add('hidden');
+  // 教程浮层打开时，随语言切换重新加载对应 README
+  const guide = document.getElementById('guide-modal');
+  if (guide && guide.classList.contains('open')) {
+    loadGuideContent();
+  }
+}
+
+/* ─── Install Guide (README) ─── */
+function guideReadmePath(lang) {
+  return lang === 'zh' ? 'README_CN.md' : 'README.md';
+}
+
+function extractGuideMarkdown(md, lang) {
+  const text = String(md || '').replace(/^\uFEFF/, '');
+  const startRe = lang === 'zh'
+    ? /^##\s*🚀\s*安装与使用\s*$/m
+    : /^##\s*🚀\s*Install & Use\s*$/m;
+  const endRe = lang === 'zh'
+    ? /^##\s*🙏\s*鸣谢\s*$/m
+    : /^##\s*🙏\s*Acknowledgements\s*$/m;
+  const start = text.search(startRe);
+  if (start < 0) return text;
+  const rest = text.slice(start);
+  const endMatch = rest.search(endRe);
+  return (endMatch > 0 ? rest.slice(0, endMatch) : rest).trim();
+}
+
+async function loadGuideContent() {
+  const body = document.getElementById('guide-body');
+  if (!body) return;
+  const dict = i18nData[currentLang] || i18nData.zh;
+  body.innerHTML = `<p class="text-slate-400">${dict.guide_loading || '…'}</p>`;
+  try {
+    const resp = await fetch(guideReadmePath(currentLang), { cache: 'no-cache' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const md = extractGuideMarkdown(await resp.text(), currentLang === 'zh' ? 'zh' : 'en');
+    if (typeof marked === 'undefined' || !marked.parse) {
+      throw new Error('marked missing');
+    }
+    marked.setOptions({ breaks: true, gfm: true });
+    body.innerHTML = marked.parse(md);
+    body.querySelectorAll('a[href]').forEach(a => {
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+    });
+  } catch (err) {
+    const fail = dict.guide_fail || 'Failed to load guide.';
+    const href = currentLang === 'zh' ? 'README_CN.md' : 'README.md';
+    body.innerHTML =
+      `<p class="text-rose-300">${fail}</p>` +
+      `<p class="mt-3"><a href="${href}" target="_blank" rel="noopener noreferrer" class="text-brand-500 underline">README</a></p>`;
+  }
+}
+
+function openGuideModal(e) {
+  if (e) {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+  }
+  const langMenu = document.getElementById('lang-menu');
+  if (langMenu) langMenu.classList.add('hidden');
+  const terms = document.getElementById('terms-menu');
+  if (terms) terms.classList.add('hidden');
+  const modal = document.getElementById('guide-modal');
+  if (!modal) return;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadGuideContent();
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    try { lucide.createIcons(); } catch (err) {}
+  }
+}
+
+function closeGuideModal() {
+  const modal = document.getElementById('guide-modal');
+  if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 document.addEventListener('click', (e) => {
@@ -1407,7 +1656,15 @@ function openLightbox(src, capKey) {
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
 }
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const guide = document.getElementById('guide-modal');
+  if (guide && guide.classList.contains('open')) {
+    closeGuideModal();
+    return;
+  }
+  closeLightbox();
+});
 
 /* ─── Scroll-snap fade ─── */
 const snapObs = new IntersectionObserver(entries => {
