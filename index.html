@@ -5,6 +5,26 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>SubsPlayer — 能翻译字幕的专业播放器</title>
  <meta name="description" content="SubsPlayer 是一款整合了视频字幕提取、音频对齐、AI 翻译、硬字幕OCR识别翻译以及双语字幕生产的 Windows 桌面播放与字幕编辑软件。">
+ <!-- GA4 官网统计：将下方两处 G-XXXXXXXXXX 替换为你的 Measurement ID（见 docs/GA4_WEB_ANALYTICS.md） -->
+ <script async src="https://www.googletagmanager.com/gtag/js?id=G-RRN2YHHM71"></script>
+ <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RRN2YHHM71', { send_page_view: true });
+  /** 下载按钮点击计数（仅统计，不影响跳转） */
+  function trackDownloadClick(source) {
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event', 'download_click', {
+          event_category: 'engagement',
+          download_source: source,
+          value: 1
+        });
+      }
+    } catch (e) { /* 统计失败不影响页面功能 */ }
+  }
+ </script>
  <link rel="preconnect" href="https://fonts.googleapis.com">
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
@@ -195,6 +215,26 @@
  .hero-head { flex:1 1 0; display:flex; align-items:center; justify-content:center; }
  .hero-sub { flex:0 0 auto; }
  .hero-btns { flex:0 0 auto; }
+ /* 标题三行：行间插入空行级间距 */
+ h1[data-i18n="hero_title"] {
+   display: flex !important;
+   flex-direction: column !important;
+   align-items: center;
+   justify-content: center;
+   width: 100%;
+   gap: 0.75em;
+   white-space: normal !important;
+   text-align: center;
+   line-height: 1.15;
+ }
+ h1[data-i18n="hero_title"] .hero-title-line {
+   display: block;
+   width: max-content;
+   margin-inline: auto;
+   text-align: center;
+   white-space: nowrap;
+   overflow: visible;
+ }
 
  /* ── Download section three blocks ── */
  .dl-body {
@@ -325,6 +365,7 @@
 
   <div class="md:hidden">
   <a href="https://pan.baidu.com/s/placeholder_subsplayer" target="_blank"
+  onclick="trackDownloadClick('mobile_nav')"
   data-i18n="nav_mobile_dl" class="px-3 py-1.5 bg-brand-500 text-white text-xs font-bold">网盘下载</a>
   </div>
  </div>
@@ -351,10 +392,10 @@
 
  <!-- headline -->
  <div class="grid-cell hero-head px-6 sm:px-12 py-6 sm:py-10">
-  <h1 data-i18n="hero_title" class="font-display text-[clamp(1.1rem,4.5vw,5.2rem)] font-black tracking-tight leading-[1.12] text-white text-center w-full">
-    <span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis">一边播放 一边翻译</span>
-    <span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis"><span class="text-brand-500">视频播放器</span> + <span class="text-brand-500">字幕编辑器</span></span>
-    <span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis">为双语字幕而生</span>
+  <h1 data-i18n="hero_title" class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white text-center w-full">
+    <span class="hero-title-line">一边播放 一边翻译</span>
+    <span class="hero-title-line"><span class="text-brand-500">视频播放器</span> + <span class="text-brand-500">字幕编辑器</span></span>
+    <span class="hero-title-line">为双语字幕而生</span>
   </h1>
  </div>
 
@@ -366,7 +407,7 @@
  </div>
 
  <!-- buttons (rendered dynamically from unified actionButtonsData source) -->
- <div id="hero-buttons-container" class="grid-cell hero-btns px-4 sm:px-12 py-4 sm:py-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-6 text-center"></div>
+ <div id="hero-buttons-container" class="grid-cell hero-btns px-4 sm:px-12 py-4 sm:py-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4 place-items-center justify-items-center w-full"></div>
 
  </div><!-- hero-content -->
  </div><!-- fade-content -->
@@ -402,7 +443,7 @@
  </span>
  </div>
  <div class="grid-cell col-heading px-7 sm:px-10 py-6 sm:py-8">
- <h2 data-i18n="f1_title" class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight">
+ <h2 data-i18n="f1_title" class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight">
 没字幕很烦？<br> <span class="text-brand-500">自动生成双语字幕</span><br>外语学习和追剧<br>不用再等待
  </h2>
  </div>
@@ -484,7 +525,7 @@
  </span>
  </div>
  <div class="grid-cell col-heading px-7 sm:px-10 py-6 sm:py-8">
- <h2 data-i18n="f3_title" class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight">
+ <h2 data-i18n="f3_title" class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight">
  <span class="text-brand-500">提取→对齐→翻译<br>→编辑→OCR→特效</span>
  <br>更是一款<br>双语字幕生产力工具
  </h2>
@@ -537,7 +578,7 @@
  </span>
  </div>
  <div class="grid-cell col-heading px-7 sm:px-10 py-6 sm:py-8">
- <h2 data-i18n="f4_title" class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-snug">
+ <h2 data-i18n="f4_title" class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight">
 只要你想得到<br><span class="text-brand-500">Gemini AI 免费模型</span><br>支持生产多种语言双语字幕
  </h2>
  </div>
@@ -586,7 +627,7 @@
  </div><!-- /dl-title -->
 
   <!-- buttons (rendered dynamically from unified actionButtonsData source) -->
-  <div id="dl-buttons-container" class="grid-cell dl-btns px-4 sm:px-16 py-4 sm:py-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-8 text-center shrink-0"></div>
+  <div id="dl-buttons-container" class="grid-cell dl-btns px-4 sm:px-16 py-4 sm:py-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4 place-items-center justify-items-center w-full shrink-0"></div>
 
  <!-- footer -->
  <div class="grid-cell dl-foot px-8 sm:px-16 pt-3 sm:pt-4 pb-8 sm:pb-12 flex flex-col sm:flex-row items-start justify-between text-sm sm:text-base text-slate-400 gap-3 sm:gap-6 font-semibold shrink-0">
@@ -604,6 +645,27 @@
     <svg class="w-4 h-4 fill-none stroke-current stroke-2 text-slate-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l11 11 10-10L12 2z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
     <span data-i18n="ft_changelog" class="leading-none">更新日志</span>
   </a>
+  <!-- What You Need to Know — secondary dropdown -->
+  <div class="relative inline-block text-left" id="terms-dropdown-wrap">
+    <button type="button" onclick="toggleTermsDropdown(event)" id="terms-menu-btn"
+      class="group hover:text-white transition flex items-center justify-center gap-2 leading-none cursor-pointer bg-transparent border-0 p-0 font-semibold text-sm sm:text-base text-slate-400">
+      <svg class="w-4 h-4 fill-none stroke-current stroke-2 text-slate-400 group-hover:text-white transition shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <span data-i18n="ft_terms" class="leading-none">使用须知</span>
+      <svg class="w-3.5 h-3.5 stroke-current stroke-2 opacity-70 shrink-0" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="terms-menu"
+      class="hidden absolute right-0 bottom-full mb-3 w-[min(92vw,26rem)] bg-slate-900/95 border border-white/20 shadow-2xl backdrop-blur-xl p-4 z-[100] text-left font-normal normal-case">
+      <h4 data-i18n="terms_title" class="text-white text-sm sm:text-base font-bold mb-3 tracking-wide">使用须知</h4>
+      <ul data-i18n="terms_body" class="text-slate-300 text-xs sm:text-sm leading-relaxed space-y-2 list-disc pl-4 marker:text-brand-500">
+        <li>SubsPlayer 保留所有权利。</li>
+        <li>下载并使用本软件，即表示您同意将自动翻译结果及视频内封字幕与其他用户共享；如不同意，请勿使用本软件。</li>
+        <li>感谢 Google 提供免费 API。本软件不会分享您的 API Key；开发者自备付费 API。</li>
+        <li>严禁商业用途。</li>
+        <li>请遵守当地法律法规。</li>
+        <li>技术无罪，开源万岁！</li>
+      </ul>
+    </div>
+  </div>
  </div>
  </div>
 
@@ -648,8 +710,9 @@ const i18nData = {
     btn_win: '下载 Windows 安装包',
     btn_baidu: '百度网盘 (提取码: sub8)',
     btn_telegram: 'Telegram 交流群',
+    btn_paypal: 'PayPal 赞助',
     f1_badge: '自动生产字幕',
-    f1_title: '没字幕很烦？<br> <span class="text-brand-500">自动生成双语字幕</span><br>立刻追剧 不用等待',
+    f1_title: '没字幕很烦？<br> <span class="text-brand-500">自动生成双语字幕</span><br>外语学习和追剧<br>不用再等待',
     f1_desc: '自动提取外文字幕，AI大模型专业翻译<br>自定义双语ASS字幕，自动加载播放<br>打开视频，1 ，2， 3，再也不用四处寻找字幕文件',
     f2_badge: '高清播放工具',
     f2_title: '这是一款<br><span class="text-brand-500">现代全功能</span><br>视频播放器',
@@ -658,12 +721,15 @@ const i18nData = {
     f3_title: '<span class="text-brand-500">提取→对齐→翻译<br>→编辑→OCR→特效</span><br>更是一款<br>双语字幕生产力工具',
     f3_desc: '打通字幕制作全链路 真正的双语字幕生产力平台<br>提取字幕轨道、音频时点对齐、智能格式清洗、双窗口实时编辑预览、设定特效<br> OCR框选硬字幕，1，2，3，翻译完成',
     f4_badge: '智能模型翻译',
-    f4_title: '只要你想得到<br><span class="text-brand-500">Gemini AI 免费模型</span><br>可生产多种语言双语字幕',
-    f4_desc: '支持自定义更多顶级模型<br>支持中英、中韩、韩英、日中双语<br>为双语字幕而生 为分享而生',
-    dl_desc: '适用于 64 位 Windows 系统<br>免费下载使用 即刻分享双语字幕',
+    f4_title: '只要你想得到<br><span class="text-brand-500">Gemini AI 免费模型</span><br>支持生产多种语言双语字幕',
+    f4_desc: '自定义AI模型制作多国语言字幕<br> 中英\中韩\韩英\日中双语字幕<br>为双语字幕而生 为分享而生',
+    dl_desc: '适用于 64 位 Windows 系统<br>免费下载使用 即刻分享字幕',
     ft_telegram: 'Telegram 群组',
     ft_github: 'GitHub 仓库',
     ft_changelog: '更新日志',
+    ft_terms: '使用须知',
+    terms_title: '使用须知',
+    terms_body: '<li>SubsPlayer 保留所有权利。</li><li>下载并使用本软件，即表示您同意将自动翻译结果及视频内封字幕与其他用户共享；如不同意，请勿使用本软件。</li><li>感谢 Google 提供免费 API。本软件不会分享您的 API Key；开发者自备付费 API。</li><li>严禁商业用途。</li><li>请遵守当地法律法规。</li><li>技术无罪，开源万岁！</li>',
     shot_label: '点击放大查看',
     lightbox_close: '关闭 (Esc)'
   },
@@ -680,6 +746,7 @@ const i18nData = {
     btn_win: 'Download Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Code: sub8)',
     btn_telegram: 'Telegram Community',
+    btn_paypal: 'Donate with PayPal',
     f1_badge: 'Auto Subtitles',
     f1_title: 'Need Subtitles?<br><span class="text-brand-500">Auto Generate Bilingual Subs</span><br>No More Waiting for Anyone',
     f1_desc: 'Extract foreign subtitles automatically, translated by top AI LLMs.<br>Custom bilingual ASS subtitles auto-loaded into playback.<br>Simple 1-2-3 workflow — no more searching for subtitle files.',
@@ -692,10 +759,13 @@ const i18nData = {
     f4_badge: 'Smart AI LLM',
     f4_title: 'Unlimited Possibilities<br><span class="text-brand-500">Powered by Gemini AI</span><br>Produce Subtitles for Any Language Pair',
     f4_desc: 'Supports custom top-tier LLM models.<br>EN-ZH, KO-ZH, JA-ZH and more.<br>Built for bilingual subtitles & easy sharing.',
-    dl_desc: 'For 64-bit Windows Systems<br>Free to download & use — Share bilingual subtitles instantly',
+    dl_desc: 'For 64-bit Windows Systems<br>Free to download & use — Share subtitles instantly',
     ft_telegram: 'Telegram Group',
     ft_github: 'GitHub Repo',
     ft_changelog: 'Changelog',
+    ft_terms: 'Terms',
+    terms_title: 'What You Need to Know',
+    terms_body: '<li>All rights reserved by SubsPlayer.</li><li>By downloading and using this software, you agree to share automatic translation results and subtitle files embedded in videos with other users. If you object to this, please do not use this software.</li><li>Thank you to Google for providing the free API. This software will not share your API key; I have my own paid API.</li><li>Commercial use is strictly prohibited.</li><li>Please comply with local laws and regulations.</li><li>Technology is innocent. Long live open source!</li>',
     shot_label: 'Click to Enlarge',
     lightbox_close: 'Close (Esc)'
   },
@@ -712,6 +782,7 @@ const i18nData = {
     btn_win: 'Windows版ダウンロード (Win64)',
     btn_baidu: 'Baidu ネットディスク (コード: sub8)',
     btn_telegram: 'Telegram コミュニティ',
+    btn_paypal: 'PayPal で支援',
     f1_badge: '自動字幕',
     f1_title: '字幕が必要ですか？<br><span class="text-brand-500">二言語字幕を自動生成</span><br>もう誰の更新も待つ必要はありません',
     f1_desc: '外国語字幕を自動抽出し、最先端AI LLMで翻訳<br>カスタム二言語ASS字幕を再生時に自動読み込み<br>シンプルな1-2-3手順 — 字幕ファイルを探す手間はゼロ',
@@ -724,10 +795,13 @@ const i18nData = {
     f4_badge: 'スマート AI LLM',
     f4_title: '無限の可能性<br><span class="text-brand-500">Gemini AI 搭載</span><br>あらゆる言語ペアの字幕を生成',
     f4_desc: '最高峰のカスタマイズ可能なLLMモデルに対応<br>英語-中国語、韓国語-中国語、日本語-中国語など多数<br>二言語字幕と手軽な共有のために設計',
-    dl_desc: '64ビット Windows OS 対応<br>無料でダウンロードして今すぐ二言語字幕を共有',
+    dl_desc: '64ビット Windows OS 対応<br>無料でダウンロードして今すぐ字幕を共有',
     ft_telegram: 'Telegram グループ',
     ft_github: 'GitHub リポジトリ',
     ft_changelog: '更新履歴',
+    ft_terms: '利用上の注意',
+    terms_title: '知っておくべきこと',
+    terms_body: '<li>SubsPlayer はすべての権利を保有します。</li><li>本ソフトウェアをダウンロードして使用することで、自動翻訳結果および動画に埋め込まれた字幕を他のユーザーと共有することに同意したものとみなします。同意されない場合はご利用くださいません。</li><li>無料 API を提供する Google に感謝します。本ソフトウェアは API キーを共有しません。開発者は独自の有料 API を使用しています。</li><li>商用利用は固く禁じられています。</li><li>現地の法令を遵守してください。</li><li>技術に罪はない。オープンソース万歳！</li>',
     shot_label: 'クリックで拡大表示',
     lightbox_close: '閉じる (Esc)'
   },
@@ -744,6 +818,7 @@ const i18nData = {
     btn_win: 'Windows 다운로드 (Win64)',
     btn_baidu: '바이두 클라우드 (코드: sub8)',
     btn_telegram: 'Telegram 커뮤니티',
+    btn_paypal: 'PayPal 후원',
     f1_badge: '자동 자막',
     f1_title: '자막이 필요하신가요?<br><span class="text-brand-500">이중 언어 자막 자동 생성</span><br>더 이상 기다릴 필요 없습니다',
     f1_desc: '외국어 자막 자동 추출 및 최고 성능 AI LLM 번역<br>사용자 정의 이중 언어 ASS 자막 자동 로드 및 재생<br>간단한 1-2-3 단계 — 자막 파일을 찾아 헤맬 필요 없음',
@@ -760,6 +835,9 @@ const i18nData = {
     ft_telegram: 'Telegram 그룹',
     ft_github: 'GitHub 저장소',
     ft_changelog: '업데이트 로그',
+    ft_terms: '이용 안내',
+    terms_title: '꼭 알아두세요',
+    terms_body: '<li>SubsPlayer는 모든 권리를 보유합니다.</li><li>본 소프트웨어를 다운로드하고 사용하면 자동 번역 결과 및 영상에 내장된 자막을 다른 사용자와 공유하는 데 동의한 것으로 간주됩니다. 동의하지 않으시면 사용하지 마십시오.</li><li>무료 API를 제공하는 Google에 감사드립니다. 본 소프트웨어는 API 키를 공유하지 않으며, 개발자는 유료 API를 사용합니다.</li><li>상업적 사용은 엄격히 금지됩니다.</li><li>현지 법률과 규정을 준수하십시오.</li><li>기술은 무죄입니다. 오픈 소스 만세!</li>',
     shot_label: '클릭하여 확대',
     lightbox_close: '닫기 (Esc)'
   },
@@ -776,6 +854,7 @@ const i18nData = {
     btn_win: 'Tải về Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Mã: sub8)',
     btn_telegram: 'Cộng đồng Telegram',
+    btn_paypal: 'Ủng hộ qua PayPal',
     f1_badge: 'Phụ đề tự động',
     f1_title: 'Cần phụ đề?<br><span class="text-brand-500">Tự động tạo phụ đề song ngữ</span><br>Không còn phải chờ đợi bất kỳ ai',
     f1_desc: 'Tự động trích xuất phụ đề tiếng nước ngoài, dịch bởi AI LLM hàng đầu.<br>Phụ đề ASS song ngữ tùy chỉnh tự động tải vào phát nhạc.<br>Quy trình 1-2-3 đơn giản — không còn phải tìm kiếm tệp phụ đề.',
@@ -792,6 +871,9 @@ const i18nData = {
     ft_telegram: 'Nhóm Telegram',
     ft_github: 'Kho mã GitHub',
     ft_changelog: 'Nhật ký thay đổi',
+    ft_terms: 'Điều khoản',
+    terms_title: 'Những điều cần biết',
+    terms_body: '<li>Mọi quyền thuộc về SubsPlayer.</li><li>Bằng việc tải và sử dụng phần mềm này, bạn đồng ý chia sẻ kết quả dịch tự động và phụ đề nhúng trong video với người dùng khác. Nếu không đồng ý, vui lòng không sử dụng.</li><li>Cảm ơn Google đã cung cấp API miễn phí. Phần mềm này không chia sẻ API key của bạn; tôi dùng API trả phí của riêng mình.</li><li>Nghiêm cấm sử dụng thương mại.</li><li>Vui lòng tuân thủ luật pháp và quy định địa phương.</li><li>Công nghệ vô tội. Vạn tuế mã nguồn mở!</li>',
     shot_label: 'Nhấp để phóng to',
     lightbox_close: 'Đóng (Esc)'
   },
@@ -808,6 +890,7 @@ const i18nData = {
     btn_win: 'Unduh Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Kode: sub8)',
     btn_telegram: 'Komunitas Telegram',
+    btn_paypal: 'Donasi via PayPal',
     f1_badge: 'Subtitle Otomatis',
     f1_title: 'Butuh Subtitle?<br><span class="text-brand-500">Buat Subtitle Bilingual Otomatis</span><br>Tidak Perlu Menunggu Siapa Pun Lagi',
     f1_desc: 'Ekstrak subtitle asing secara otomatis, diterjemahkan oleh AI LLM teratas.<br>Subtitle ASS bilingual kustom otomatis dimuat ke pemutaran.<br>Alur kerja 1-2-3 mudah — tidak ada lagi pencarian berkas subtitle.',
@@ -824,6 +907,9 @@ const i18nData = {
     ft_telegram: 'Grup Telegram',
     ft_github: 'Repositori GitHub',
     ft_changelog: 'Catatan Pembaruan',
+    ft_terms: 'Ketentuan',
+    terms_title: 'Yang Perlu Anda Ketahui',
+    terms_body: '<li>Semua hak dilindungi oleh SubsPlayer.</li><li>Dengan mengunduh dan menggunakan perangkat lunak ini, Anda setuju untuk berbagi hasil terjemahan otomatis dan file subtitle yang tertanam dalam video dengan pengguna lain. Jika keberatan, jangan gunakan perangkat lunak ini.</li><li>Terima kasih kepada Google atas API gratis. Perangkat lunak ini tidak akan membagikan API key Anda; saya menggunakan API berbayar sendiri.</li><li>Penggunaan komersial dilarang keras.</li><li>Harap patuhi hukum dan peraturan setempat.</li><li>Teknologi tidak bersalah. Hidup open source!</li>',
     shot_label: 'Klik untuk Memperbesar',
     lightbox_close: 'Tutup (Esc)'
   },
@@ -840,6 +926,7 @@ const i18nData = {
     btn_win: 'Télécharger Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Code: sub8)',
     btn_telegram: 'Communauté Telegram',
+    btn_paypal: 'Faire un don PayPal',
     f1_badge: 'Sous-titres Auto',
     f1_title: 'Besoin de sous-titres ?<br><span class="text-brand-500">Génération automatique bilingue</span><br>N\'attendez plus après qui que ce soit',
     f1_desc: 'Extraction automatique des sous-titres étrangers et traduction par les meilleurs IA LLM.<br>Sous-titres ASS bilingues personnalisés chargés automatiquement lors de la lecture.<br>Flux 1-2-3 simple — plus besoin de chercher des fichiers de sous-titres.',
@@ -856,6 +943,9 @@ const i18nData = {
     ft_telegram: 'Groupe Telegram',
     ft_github: 'Dépôt GitHub',
     ft_changelog: 'Notes de version',
+    ft_terms: 'Mentions',
+    terms_title: 'Ce qu\'il faut savoir',
+    terms_body: '<li>Tous droits réservés par SubsPlayer.</li><li>En téléchargeant et en utilisant ce logiciel, vous acceptez de partager les résultats de traduction automatique et les sous-titres intégrés aux vidéos avec d\'autres utilisateurs. Si vous vous y opposez, n\'utilisez pas ce logiciel.</li><li>Merci à Google pour l\'API gratuite. Ce logiciel ne partagera pas votre clé API ; j\'utilise ma propre API payante.</li><li>L\'usage commercial est strictement interdit.</li><li>Veuillez respecter les lois et réglementations locales.</li><li>La technologie est innocente. Vive l\'open source !</li>',
     shot_label: 'Cliquer pour agrandir',
     lightbox_close: 'Fermer (Esc)'
   },
@@ -872,6 +962,7 @@ const i18nData = {
     btn_win: 'Windows Download (Win64)',
     btn_baidu: 'Baidu Netdisk (Code: sub8)',
     btn_telegram: 'Telegram Community',
+    btn_paypal: 'Donate with PayPal',
     f1_badge: 'Auto-Untertitel',
     f1_title: 'Untertitel benötigt?<br><span class="text-brand-500">Zweisprachige Untertitel automatisch erstellen</span><br>Kein Warten mehr auf andere',
     f1_desc: 'Fremdsprachige Untertitel automatisch extrahieren, übersetzt durch Top KI-LLMs.<br>Benutzerdefinierte zweisprachige ASS-Untertitel werden automatisch geladen.<br>Einfacher 1-2-3 Workflow — kein Suchen nach Untertiteldateien mehr.',
@@ -888,6 +979,9 @@ const i18nData = {
     ft_telegram: 'Telegram Gruppe',
     ft_github: 'GitHub Repository',
     ft_changelog: 'Änderungsprotokoll',
+    ft_terms: 'Hinweise',
+    terms_title: 'Was Sie wissen müssen',
+    terms_body: '<li>Alle Rechte vorbehalten von SubsPlayer.</li><li>Durch das Herunterladen und Nutzen dieser Software stimmen Sie zu, automatische Übersetzungsergebnisse und in Videos eingebettete Untertitel mit anderen Nutzern zu teilen. Wenn Sie dem widersprechen, verwenden Sie diese Software bitte nicht.</li><li>Danke an Google für die kostenlose API. Diese Software gibt Ihren API-Schlüssel nicht weiter; ich nutze meine eigene kostenpflichtige API.</li><li>Kommerzielle Nutzung ist streng untersagt.</li><li>Bitte halten Sie sich an lokale Gesetze und Vorschriften.</li><li>Technik ist unschuldig. Es lebe Open Source!</li>',
     shot_label: 'Klicken zum Vergrößern',
     lightbox_close: 'Schließen (Esc)'
   },
@@ -904,6 +998,7 @@ const i18nData = {
     btn_win: 'Windows डाउनलोड (Win64)',
     btn_baidu: 'Baidu नेटडिस्क (कोड: sub8)',
     btn_telegram: 'Telegram समुदाय',
+    btn_paypal: 'PayPal से दान करें',
     f1_badge: 'ऑटो सबटाइटल',
     f1_title: 'सबटाइटल चाहिए?<br><span class="text-brand-500">द्विभाषी सबटाइटल स्वतः बनाएं</span><br>अब किसी का इंतजार न करें',
     f1_desc: 'विदेशी सबटाइटल स्वतः निकालें, शीर्ष AI LLM द्वारा अनुवादित।<br>कस्टम द्विभाषी ASS सबटाइटल प्लेबैक में स्वतः लोड होते हैं।<br>आसान 1-2-3 वर्कफ़्लो — सबटाइटल फ़ाइलें खोजने का कोई झंझट नहीं।',
@@ -920,6 +1015,9 @@ const i18nData = {
     ft_telegram: 'Telegram समूह',
     ft_github: 'GitHub रिपॉजिटरी',
     ft_changelog: 'अपडेट लॉग',
+    ft_terms: 'नियम',
+    terms_title: 'आपको क्या जानना चाहिए',
+    terms_body: '<li>सभी अधिकार SubsPlayer के पास सुरक्षित हैं।</li><li>इस सॉफ़्टवेयर को डाउनलोड और उपयोग करके, आप स्वचालित अनुवाद परिणामों और वीडियो में एम्बेडेड सबटाइटल फ़ाइलों को अन्य उपयोगकर्ताओं के साथ साझा करने के लिए सहमत होते हैं। यदि आप सहमत नहीं हैं, तो कृपया इसका उपयोग न करें।</li><li>मुफ़्त API प्रदान करने के लिए Google का धन्यवाद। यह सॉफ़्टवेयर आपकी API कुंजी साझा नहीं करेगा; मेरे पास अपना भुगतान किया गया API है।</li><li>व्यावसायिक उपयोग सख्त रूप से निषिद्ध है।</li><li>कृपया स्थानीय कानूनों और नियमों का पालन करें।</li><li>तकनीक निर्दोष है। ओपन सोर्स अमर रहे!</li>',
     shot_label: 'बड़ा करने के लिए क्लिक करें',
     lightbox_close: 'बंद करें (Esc)'
   },
@@ -936,6 +1034,7 @@ const i18nData = {
     btn_win: 'Baixar Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Código: sub8)',
     btn_telegram: 'Comunidade Telegram',
+    btn_paypal: 'Doar com PayPal',
     f1_badge: 'Legendas Auto',
     f1_title: 'Precisa de Legendas?<br><span class="text-brand-500">Geração Automática Bilingue</span><br>Não Espere Mais Por Ninguém',
     f1_desc: 'Extraia legendas estrangeiras automaticamente, traduzidas pelas melhores IA LLMs.<br>Legendas ASS bilingues personalizadas carregadas automaticamente na reprodução.<br>Fluxo 1-2-3 simples — sem mais procurar arquivos de legenda.',
@@ -952,6 +1051,9 @@ const i18nData = {
     ft_telegram: 'Grupo Telegram',
     ft_github: 'Repositório GitHub',
     ft_changelog: 'Notas de Atualização',
+    ft_terms: 'Avisos',
+    terms_title: 'O que você precisa saber',
+    terms_body: '<li>Todos os direitos reservados por SubsPlayer.</li><li>Ao baixar e usar este software, você concorda em compartilhar resultados de tradução automática e arquivos de legendas incorporados em vídeos com outros usuários. Se discordar, não use este software.</li><li>Agradecemos ao Google pela API gratuita. Este software não compartilhará sua chave de API; eu uso minha própria API paga.</li><li>O uso comercial é estritamente proibido.</li><li>Cumpra as leis e regulamentos locais.</li><li>A tecnologia é inocente. Viva o open source!</li>',
     shot_label: 'Clique para ampliar',
     lightbox_close: 'Fechar (Esc)'
   },
@@ -968,6 +1070,7 @@ const i18nData = {
     btn_win: 'Descargar Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Código: sub8)',
     btn_telegram: 'Comunidad Telegram',
+    btn_paypal: 'Donar con PayPal',
     f1_badge: 'Subtítulos Auto',
     f1_title: '¿Necesitas Subtítulos?<br><span class="text-brand-500">Generación Automática Bilingüe</span><br>No Esperes Más Por Nadie',
     f1_desc: 'Extrae subtítulos extranjeros automáticamente, traducidos por IA LLMs de primer nivel.<br>Subtítulos ASS bilingües personalizados cargados automáticamente en la reproducción.<br>Flujo 1-2-3 simple — sin más búsquedas de archivos de subtítulos.',
@@ -984,6 +1087,9 @@ const i18nData = {
     ft_telegram: 'Grupo Telegram',
     ft_github: 'Repositorio GitHub',
     ft_changelog: 'Notas de Actualización',
+    ft_terms: 'Avisos',
+    terms_title: 'Lo que debes saber',
+    terms_body: '<li>Todos los derechos reservados por SubsPlayer.</li><li>Al descargar y usar este software, aceptas compartir los resultados de traducción automática y los subtítulos incrustados en los vídeos con otros usuarios. Si no estás de acuerdo, no uses este software.</li><li>Gracias a Google por proporcionar la API gratuita. Este software no compartirá tu clave API; yo uso mi propia API de pago.</li><li>El uso comercial está estrictamente prohibido.</li><li>Cumple las leyes y normativas locales.</li><li>La tecnología es inocente. ¡Larga vida al open source!</li>',
     shot_label: 'Haz clic para ampliar',
     lightbox_close: 'Cerrar (Esc)'
   }
@@ -1027,6 +1133,13 @@ const actionButtonsData = [
     url: 'https://t.me/subsplayer',
     bg: 'bg-[#26A5E4]/20 hover:bg-[#26A5E4]/35 border border-[#26A5E4]/50 hover:border-[#26A5E4] text-white shadow-[0_0_25px_rgba(38,165,228,0.25)] hover:shadow-[0_0_35px_rgba(38,165,228,0.5)] hover:scale-[1.02]',
     icon: `<svg class="w-5 h-5 sm:w-7 sm:h-7 fill-current shrink-0 text-[#26A5E4]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .54-1.43.53-.47-.01-1.37-.26-2.04-.48-.82-.27-1.47-.42-1.42-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.66-2.89 8.01-3.46 3.81-1.6 4.6-1.88 5.12-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>`
+  },
+  {
+    id: 'btn-paypal',
+    key: 'btn_paypal',
+    url: 'https://paypal.me/subsplayer',
+    bg: 'bg-[#0070BA]/20 hover:bg-[#0070BA]/35 border border-[#0070BA]/55 hover:border-[#0070BA] text-white shadow-[0_0_25px_rgba(0,112,186,0.28)] hover:shadow-[0_0_35px_rgba(0,112,186,0.5)] hover:scale-[1.02]',
+    icon: `<svg class="w-5 h-5 sm:w-7 sm:h-7 fill-current shrink-0 text-[#0070BA]" viewBox="0 0 24 24"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a.3.3 0 0 1-.046.03c-.54 2.87-2.41 4.52-5.66 4.52h-1.83c-.34 0-.63.24-.69.57l-.84 5.34-.24 1.52c-.05.3.18.57.48.57h3.37c.42 0 .78-.3.85-.72l.03-.17.66-4.18.04-.23c.07-.42.43-.72.85-.72h.54c3.48 0 6.2-1.41 7-5.5.33-1.71.16-3.14-.75-4.15-.27-.3-.6-.54-.98-.73z"/></svg>`
   }
 ];
 
@@ -1034,17 +1147,24 @@ function renderActionButtons(containerId, isHero = false) {
   const container = document.getElementById(containerId);
   if (!container) return;
   const dict = i18nData[currentLang] || i18nData.zh;
-  const sizeClasses = isHero 
-    ? 'px-5 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-bold'
-    : 'px-6 sm:px-10 py-3.5 sm:py-4 text-base sm:text-lg font-extrabold';
+  // 四按钮强制同宽同高（手机/桌面一致）
+  const sizeClasses = isHero
+    ? 'w-full max-w-[300px] h-12 sm:h-14 px-3 text-sm sm:text-base font-bold'
+    : 'w-full max-w-[300px] h-14 sm:h-16 px-3 text-base sm:text-lg font-extrabold';
 
-  container.innerHTML = actionButtonsData.map(btn => `
-    <a href="${btn.url}" target="_blank"
-       class="w-full max-w-[320px] xs:max-w-[360px] sm:w-auto sm:max-w-none inline-flex items-center justify-center gap-2.5 ${sizeClasses} ${btn.bg} transition-all duration-300 transform rounded-none">
+  container.innerHTML = actionButtonsData.map(btn => {
+    // 仅 Windows / 百度网盘按钮计入下载统计；Telegram / PayPal 不计入
+    const isDownload = (btn.id === 'btn-win' || btn.id === 'btn-baidu');
+    const trackAttr = isDownload
+      ? ` onclick="trackDownloadClick('${btn.id}')"`
+      : '';
+    return `
+    <a href="${btn.url}" target="_blank"${trackAttr}
+       class="${sizeClasses} inline-flex items-center justify-center gap-2.5 ${btn.bg} transition-all duration-300 transform rounded-none box-border whitespace-nowrap overflow-hidden text-ellipsis">
       ${btn.icon}
-      <span data-i18n="${btn.key}">${dict[btn.key] || ''}</span>
-    </a>
-  `).join('');
+      <span data-i18n="${btn.key}" class="truncate">${dict[btn.key] || ''}</span>
+    </a>`;
+  }).join('');
 }
 
 function renderAllActionButtons() {
@@ -1060,6 +1180,18 @@ function toggleLangDropdown(e) {
   if (menu) {
     menu.classList.toggle('hidden');
   }
+  const terms = document.getElementById('terms-menu');
+  if (terms) terms.classList.add('hidden');
+}
+
+function toggleTermsDropdown(e) {
+  if (e) {
+    if (e.stopPropagation) e.stopPropagation();
+  }
+  const menu = document.getElementById('terms-menu');
+  if (menu) menu.classList.toggle('hidden');
+  const lang = document.getElementById('lang-menu');
+  if (lang) lang.classList.add('hidden');
 }
 
 function selectLang(lang) {
@@ -1073,6 +1205,11 @@ document.addEventListener('click', (e) => {
   if (wrap && !wrap.contains(e.target)) {
     const menu = document.getElementById('lang-menu');
     if (menu) menu.classList.add('hidden');
+  }
+  const termsWrap = document.getElementById('terms-dropdown-wrap');
+  if (termsWrap && !termsWrap.contains(e.target)) {
+    const terms = document.getElementById('terms-menu');
+    if (terms) terms.classList.add('hidden');
   }
 });
 
@@ -1104,8 +1241,8 @@ function setLanguage(lang) {
     const key = el.getAttribute('data-i18n');
     if (dict[key]) {
       if (key === 'hero_title') {
-        const rawLines = dict[key].split('<br>');
-        el.innerHTML = rawLines.map(line => `<span class="block whitespace-nowrap max-w-full overflow-hidden text-ellipsis">${line}</span>`).join('');
+        const lines = String(dict[key]).split(/<br\s*\/?>/i).map(s => s.trim()).filter(Boolean);
+        el.innerHTML = lines.map(line => `<span class="hero-title-line">${line}</span>`).join('');
       } else {
         el.innerHTML = dict[key];
       }
@@ -1118,6 +1255,51 @@ function setLanguage(lang) {
   if (nameEl && langDisplayNames[lang]) {
     nameEl.textContent = langDisplayNames[lang];
   }
+
+  requestAnimationFrame(() => fitHeroTitle());
+}
+
+/** Scale hero headline to fit container width: no wrap, no clipping. */
+function fitHeroTitle() {
+  const h1 = document.querySelector('h1[data-i18n="hero_title"]');
+  if (!h1) return;
+  h1.style.fontSize = '';
+  const maxPx = parseFloat(getComputedStyle(h1).fontSize);
+  if (!maxPx || maxPx <= 0) return;
+  const containerW = h1.clientWidth;
+  if (containerW <= 0) return;
+
+  const lines = () => h1.querySelectorAll('.hero-title-line');
+  const fits = (size) => {
+    h1.style.fontSize = size + 'px';
+    return [...lines()].every(line => line.scrollWidth <= containerW + 1);
+  };
+
+  if (fits(maxPx)) {
+    h1.style.fontSize = '';
+    return;
+  }
+
+  let lo = 12, hi = maxPx, best = 12;
+  for (let i = 0; i < 24; i++) {
+    const mid = (lo + hi) / 2;
+    if (fits(mid)) {
+      best = mid;
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  h1.style.fontSize = best + 'px';
+}
+
+let _heroFitTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_heroFitTimer);
+  _heroFitTimer = setTimeout(fitHeroTitle, 80);
+});
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => fitHeroTitle()).catch(() => {});
 }
 
 // Script runs at end of body — DOM is already ready; no need to wait for DOMContentLoaded
@@ -1238,10 +1420,18 @@ function drawGrid() {
   const activeSection = document.querySelector('.full-page-section.active');
   if (!activeSection) { ctx.clearRect(0, 0, W, H); return; }
 
+  /* 首页/下载页为单栏：竖线只取贴齐 section 左右边的边，避免缩窄的 cell 画出多余竖线 */
+  const singleCol = (activeSection.id === 'hero' || activeSection.id === 'download-page');
+  const secR = activeSection.getBoundingClientRect();
   activeSection.querySelectorAll('.grid-cell').forEach(el => {
     const r = el.getBoundingClientRect();
     hY.push(r.top, r.bottom);
-    vX.push(r.left, r.right);
+    if (!singleCol) {
+      vX.push(r.left, r.right);
+    } else {
+      if (Math.abs(r.left - secR.left) <= 4) vX.push(r.left);
+      if (Math.abs(r.right - secR.right) <= 4) vX.push(r.right);
+    }
   });
 
  const uH = dedupe(hY);
