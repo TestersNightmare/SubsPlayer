@@ -616,8 +616,8 @@
         <img src="sub2.png" alt="SubsPlayer"
              class="h-[72px] sm:h-[96px] md:h-[120px] w-auto object-contain filter drop-shadow-[0_0_36px_rgba(79,140,255,0.6)]">
 
-        <div class="inline-flex items-center gap-1.5 px-3.5 py-0.5 bg-brand-500/15 border border-brand-500/40 text-white text-xs sm:text-sm font-extrabold tracking-widest">
-            v1.0.0
+            <div id="dl-version-badge" class="inline-flex items-center gap-1.5 px-3.5 py-0.5 bg-brand-500/15 border border-brand-500/40 text-white text-xs sm:text-sm font-extrabold tracking-widest">
+            Latest
         </div>
     </div>
 
@@ -1112,11 +1112,17 @@ const langDisplayNames = {
 };
 
 /* ─── Unified Action Buttons Component ─── */
+/** GitHub Release 安装包文件名固定，直链始终指向最新版 */
+const INSTALLER_FILENAME = 'subsplayer_installer_win64.exe';
+const GITHUB_RELEASES_API = 'https://api.github.com/repos/TestersNightmare/SubsPlayer/releases/latest';
+const GITHUB_INSTALLER_DOWNLOAD =
+  'https://github.com/TestersNightmare/SubsPlayer/releases/latest/download/' + INSTALLER_FILENAME;
+
 const actionButtonsData = [
   {
     id: 'btn-win',
     key: 'btn_win',
-    url: 'https://github.com/TestersNightmare/SubsPlayer/releases',
+    url: GITHUB_INSTALLER_DOWNLOAD,
     bg: 'bg-gradient-to-r from-[#4F8CFF] to-[#3A76E8] hover:from-[#3A76E8] hover:to-[#2860D4] border border-blue-400/40 text-white shadow-[0_0_30px_rgba(79,140,255,0.45)] hover:shadow-[0_0_40px_rgba(79,140,255,0.65)] hover:scale-[1.02]',
     icon: `<svg class="w-5 h-5 sm:w-7 sm:h-7 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
   },
@@ -1170,6 +1176,22 @@ function renderActionButtons(containerId, isHero = false) {
 function renderAllActionButtons() {
   renderActionButtons('hero-buttons-container', true);
   renderActionButtons('dl-buttons-container', false);
+}
+
+/** 仅同步版本角标；下载按钮已使用固定 latest/download 直链 */
+async function resolveLatestReleaseDownload() {
+  try {
+    const resp = await fetch(GITHUB_RELEASES_API, {
+      headers: { Accept: 'application/vnd.github+json' }
+    });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const tag = String(data.tag_name || data.name || '').replace(/^v/i, '');
+    const badge = document.getElementById('dl-version-badge');
+    if (badge && tag) badge.textContent = 'v' + tag;
+  } catch (e) {
+    // 角标更新失败不影响固定直链下载
+  }
 }
 
 function toggleLangDropdown(e) {
@@ -1306,9 +1328,11 @@ if (document.fonts && document.fonts.ready) {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     setLanguage(getInitialLanguage());
+    resolveLatestReleaseDownload();
   });
 } else {
   setLanguage(getInitialLanguage());
+  resolveLatestReleaseDownload();
 }
 
 /* ─── Lightbox ─── */
