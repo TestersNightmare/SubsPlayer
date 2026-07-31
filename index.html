@@ -247,6 +247,67 @@
  .dl-btns { flex: 0 0 auto; }
  .dl-foot { flex: 0 0 auto; }
 
+ /* 手机：下载页可滚动，避免页脚「更新日志/使用须知」被 100vh + overflow:hidden 裁切 */
+ @media (max-width: 639px) {
+   #download-page.full-page-section {
+     overflow-x: hidden;
+     overflow-y: auto;
+     -webkit-overflow-scrolling: touch;
+   }
+   #download-page .dl-body {
+     flex: 1 1 auto;
+     min-height: min-content;
+   }
+   #download-page .dl-title {
+     flex: 0 0 auto;
+     padding-top: 0.5rem;
+     padding-bottom: 0.25rem;
+   }
+   #download-page .dl-logo-stack {
+     gap: 0.55rem !important;
+     margin-bottom: 0.5rem !important;
+   }
+   #download-page .dl-logo-icon {
+     width: 96px !important;
+     height: 96px !important;
+     padding: 0.6rem !important;
+   }
+   #download-page .dl-logo-wordmark {
+     height: 52px !important;
+   }
+   #download-page .dl-btns {
+     padding-top: 0.75rem !important;
+     padding-bottom: 0.75rem !important;
+     gap: 0.65rem !important;
+   }
+   #download-page .dl-foot {
+     padding: 0.5rem 1rem max(1.25rem, env(safe-area-inset-bottom, 0px)) !important;
+     gap: 0.65rem !important;
+     align-items: center !important;
+   }
+   #download-page .dl-foot > div:last-child {
+     gap: 0.85rem 1.1rem !important;
+     row-gap: 0.7rem !important;
+     justify-content: center;
+     font-size: 12px;
+   }
+   /* 使用须知：手机改为视口居中浮层，避免贴底被裁切 */
+   #terms-menu {
+     position: fixed !important;
+     left: 50% !important;
+     top: 50% !important;
+     right: auto !important;
+     bottom: auto !important;
+     transform: translate(-50%, -50%);
+     margin: 0 !important;
+     width: min(92vw, 26rem) !important;
+     max-height: min(68vh, 28rem);
+     overflow-y: auto;
+     z-index: 200 !important;
+     border-radius: 0;
+   }
+ }
+
  /* ── Fade animations ── */
  .fade-content {
  opacity: 0;
@@ -608,13 +669,13 @@
  <div class="grid-cell dl-title px-6 sm:px-12 py-2 sm:py-4 text-center flex flex-col items-center justify-center flex-1">
 
     <!-- Compact Assembled Logo Combo -->
-    <div class="flex flex-col items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-        <div class="bg-[#4F8CFF] p-3 sm:p-5 md:p-6 w-[128px] h-[128px] sm:w-[168px] sm:h-[168px] md:w-[200px] md:h-[200px] flex items-center justify-center shadow-[0_0_50px_rgba(79,140,255,0.6)] flex-shrink-0">
+    <div class="dl-logo-stack flex flex-col items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+        <div class="dl-logo-icon bg-[#4F8CFF] p-3 sm:p-5 md:p-6 w-[128px] h-[128px] sm:w-[168px] sm:h-[168px] md:w-[200px] md:h-[200px] flex items-center justify-center shadow-[0_0_50px_rgba(79,140,255,0.6)] flex-shrink-0">
             <img src="sub3.png" alt="SubsPlayer Icon" class="w-full h-full object-contain">
         </div>
 
         <img src="sub2.png" alt="SubsPlayer"
-             class="h-[72px] sm:h-[96px] md:h-[120px] w-auto object-contain filter drop-shadow-[0_0_36px_rgba(79,140,255,0.6)]">
+             class="dl-logo-wordmark h-[72px] sm:h-[96px] md:h-[120px] w-auto object-contain filter drop-shadow-[0_0_36px_rgba(79,140,255,0.6)]">
 
             <div id="dl-version-badge" class="inline-flex items-center gap-1.5 px-3.5 py-0.5 bg-brand-500/15 border border-brand-500/40 text-white text-xs sm:text-sm font-extrabold tracking-widest">
             Latest
@@ -630,9 +691,9 @@
   <div id="dl-buttons-container" class="grid-cell dl-btns px-4 sm:px-16 py-4 sm:py-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4 place-items-center justify-items-center w-full shrink-0"></div>
 
  <!-- footer -->
- <div class="grid-cell dl-foot px-8 sm:px-16 pt-3 sm:pt-4 pb-8 sm:pb-12 flex flex-col sm:flex-row items-start justify-between text-sm sm:text-base text-slate-400 gap-3 sm:gap-6 font-semibold shrink-0">
+ <div class="grid-cell dl-foot px-4 sm:px-16 pt-2 sm:pt-4 pb-5 sm:pb-12 flex flex-col sm:flex-row items-center sm:items-start justify-between text-sm sm:text-base text-slate-400 gap-2.5 sm:gap-6 font-semibold shrink-0">
  <div class="flex items-center text-center sm:text-left leading-none">© 2026 SubsPlayer. All rights reserved.</div>
- <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 leading-none">
+ <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5 sm:gap-10 leading-none">
   <a href="https://t.me/subsplayer" target="_blank" class="hover:text-[#26A5E4] transition flex items-center justify-center gap-2 leading-none">
     <svg class="w-4 h-4 fill-current text-[#26A5E4] shrink-0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .54-1.43.53-.47-.01-1.37-.26-2.04-.48-.82-.27-1.47-.42-1.42-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.66-2.89 8.01-3.46 3.81-1.6 4.6-1.88 5.12-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
     <span data-i18n="ft_telegram" class="leading-none">Telegram 群组</span>
@@ -741,8 +802,8 @@ const i18nData = {
     nav_download: 'Download',
     nav_mobile_dl: 'Download',
     hero_badge: 'SubsPlayer V1.0.0 Released · Powered by Gemini AI Engine',
-    hero_title: 'Generate bilingual subtitles automatically in 1 minute. Play & Translate Simultaneously<br><span class="text-brand-500">Video Player</span> + <span class="text-brand-500">Subtitle Editor</span><br>Built for Bilingual Subtitles',
-    hero_sub: 'All-in-one subtitle workflow — intuitive, smooth, and effortless.',
+    hero_title: 'Generate bilingual subtitles automatically in 1 minute<br><span class="text-brand-500">Video Player</span> + <span class="text-brand-500">Subtitle Editor</span><br>Built for Bilingual Subtitles',
+    hero_sub: 'Play & Translate Simultaneously — no more searching around<br>All-in-one subtitle workflow — intuitive, smooth, and effortless.',
     btn_win: 'Download Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Code: sub8)',
     btn_telegram: 'Telegram Community',
@@ -777,8 +838,8 @@ const i18nData = {
     nav_download: 'ダウンロード',
     nav_mobile_dl: 'ダウンロード',
     hero_badge: 'SubsPlayer V1.0.0 リリース · Gemini AI エンジン搭載',
-    hero_title: '1分で二言語字幕を自動生成。再生しながら同時翻訳<br><span class="text-brand-500">動画プレイヤー</span> + <span class="text-brand-500">字幕エディター</span><br>二言語字幕のために開発',
-    hero_sub: 'オールインワン字幕ワークフロー — 直感的でスムーズ、手間いらず。',
+    hero_title: '1分で二言語字幕を自動生成<br><span class="text-brand-500">動画プレイヤー</span> + <span class="text-brand-500">字幕エディター</span><br>二言語字幕のために開発',
+    hero_sub: '再生しながら同時翻訳、もう探す必要なし<br>オールインワン字幕ワークフロー — 直感的でスムーズ、手間いらず。',
     btn_win: 'Windows版ダウンロード (Win64)',
     btn_baidu: 'Baidu ネットディスク (コード: sub8)',
     btn_telegram: 'Telegram コミュニティ',
@@ -813,8 +874,8 @@ const i18nData = {
     nav_download: '다운로드',
     nav_mobile_dl: '다운로드',
     hero_badge: 'SubsPlayer V1.0.0 출시 · Gemini AI 엔진 탑재',
-    hero_title: '1분 만에 이중 언어 자막 자동 생성. 재생과 번역을 동시에<br><span class="text-brand-500">비디오 플레이어</span> + <span class="text-brand-500">자막 에디터</span><br>이중 언어 자막을 위한 설계',
-    hero_sub: '올인원 자막 워크플로우 — 직관적이고 매끄러우며 간편합니다.',
+    hero_title: '1분 만에 이중 언어 자막 자동 생성<br><span class="text-brand-500">비디오 플레이어</span> + <span class="text-brand-500">자막 에디터</span><br>이중 언어 자막을 위한 설계',
+    hero_sub: '재생과 번역을 동시에 — 더 이상 찾아다닐 필요 없음<br>올인원 자막 워크플로우 — 직관적이고 매끄러우며 간편합니다.',
     btn_win: 'Windows 다운로드 (Win64)',
     btn_baidu: '바이두 클라우드 (코드: sub8)',
     btn_telegram: 'Telegram 커뮤니티',
@@ -849,8 +910,8 @@ const i18nData = {
     nav_download: 'Tải về',
     nav_mobile_dl: 'Tải về',
     hero_badge: 'SubsPlayer V1.0.0 Phát hành · Tích hợp động cơ Gemini AI',
-    hero_title: 'Tự động tạo phụ đề song ngữ trong 1 phút. Vừa phát vừa dịch đồng thời<br><span class="text-brand-500">Trình phát video</span> + <span class="text-brand-500">Trình chỉnh sửa phụ đề</span><br>Thiết kế dành cho phụ đề song ngữ',
-    hero_sub: 'Quy trình phụ đề tất cả trong một — trực quan, mượt mà và dễ dàng.',
+    hero_title: 'Tự động tạo phụ đề song ngữ trong 1 phút<br><span class="text-brand-500">Trình phát video</span> + <span class="text-brand-500">Trình chỉnh sửa phụ đề</span><br>Thiết kế dành cho phụ đề song ngữ',
+    hero_sub: 'Vừa phát vừa dịch — không còn phải tìm kiếm khắp nơi<br>Quy trình phụ đề tất cả trong một — trực quan, mượt mà và dễ dàng.',
     btn_win: 'Tải về Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Mã: sub8)',
     btn_telegram: 'Cộng đồng Telegram',
@@ -885,8 +946,8 @@ const i18nData = {
     nav_download: 'Unduh',
     nav_mobile_dl: 'Unduh',
     hero_badge: 'SubsPlayer V1.0.0 Dirilis · Didukung oleh Mesin Gemini AI',
-    hero_title: 'Buat subtitle bilingual otomatis dalam 1 menit. Putar & Terjemahkan Sekaligus<br><span class="text-brand-500">Pemutar Video</span> + <span class="text-brand-500">Editor Subtitle</span><br>Dibuat untuk Subtitle Bilingual',
-    hero_sub: 'Alur kerja subtitle serba ada — intuitif, lancar, dan mudah.',
+    hero_title: 'Buat subtitle bilingual otomatis dalam 1 menit<br><span class="text-brand-500">Pemutar Video</span> + <span class="text-brand-500">Editor Subtitle</span><br>Dibuat untuk Subtitle Bilingual',
+    hero_sub: 'Putar & Terjemahkan Sekaligus — tak perlu mencari ke mana-mana<br>Alur kerja subtitle serba ada — intuitif, lancar, dan mudah.',
     btn_win: 'Unduh Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Kode: sub8)',
     btn_telegram: 'Komunitas Telegram',
@@ -921,8 +982,8 @@ const i18nData = {
     nav_download: 'Télécharger',
     nav_mobile_dl: 'Télécharger',
     hero_badge: 'SubsPlayer V1.0.0 Sorti · Propulsé par le moteur Gemini AI',
-    hero_title: 'Générez des sous-titres bilingues automatiquement en 1 minute. Lisez & Traduisez simultanément<br><span class="text-brand-500">Lecteur Vidéo</span> + <span class="text-brand-500">Éditeur de Sous-titres</span><br>Conçu pour les sous-titres bilingues',
-    hero_sub: 'Flux de travail tout-en-un — intuitif, fluide et sans effort.',
+    hero_title: 'Générez des sous-titres bilingues automatiquement en 1 minute<br><span class="text-brand-500">Lecteur Vidéo</span> + <span class="text-brand-500">Éditeur de Sous-titres</span><br>Conçu pour les sous-titres bilingues',
+    hero_sub: 'Lisez & Traduisez simultanément — plus besoin de chercher partout<br>Flux de travail tout-en-un — intuitif, fluide et sans effort.',
     btn_win: 'Télécharger Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Code: sub8)',
     btn_telegram: 'Communauté Telegram',
@@ -957,8 +1018,8 @@ const i18nData = {
     nav_download: 'Download',
     nav_mobile_dl: 'Download',
     hero_badge: 'SubsPlayer V1.0.0 Veröffentlicht · Angetrieben durch Gemini AI Engine',
-    hero_title: 'Zweisprachige Untertitel automatisch in 1 Minute erstellen. Gleichzeitig abspielen & übersetzen<br><span class="text-brand-500">Video-Player</span> + <span class="text-brand-500">Untertitel-Editor</span><br>Entwickelt für zweisprachige Untertitel',
-    hero_sub: 'All-in-One Untertitel-Workflow — intuitiv, nahtlos und mühelos.',
+    hero_title: 'Zweisprachige Untertitel automatisch in 1 Minute erstellen<br><span class="text-brand-500">Video-Player</span> + <span class="text-brand-500">Untertitel-Editor</span><br>Entwickelt für zweisprachige Untertitel',
+    hero_sub: 'Gleichzeitig abspielen & übersetzen — kein Suchen mehr nötig<br>All-in-One Untertitel-Workflow — intuitiv, nahtlos und mühelos.',
     btn_win: 'Windows Download (Win64)',
     btn_baidu: 'Baidu Netdisk (Code: sub8)',
     btn_telegram: 'Telegram Community',
@@ -993,8 +1054,8 @@ const i18nData = {
     nav_download: 'डाउनलोड',
     nav_mobile_dl: 'डाउनलोड',
     hero_badge: 'SubsPlayer V1.0.0 जारी · Gemini AI इंजन द्वारा संचालित',
-    hero_title: '1 मिनट में स्वचालित द्विभाषी सबटाइटल बनाएं। एक साथ प्ले करें और अनुवाद करें<br><span class="text-brand-500">वीडियो प्लेयर</span> + <span class="text-brand-500">सबटाइटल एडिटर</span><br>द्विभाषी सबटाइटल के लिए निर्मित',
-    hero_sub: 'ऑल-इन-वन सबटाइटल वर्कफ़्लो — सहज, सुगम और आसान।',
+    hero_title: '1 मिनट में स्वचालित द्विभाषी सबटाइटल बनाएं<br><span class="text-brand-500">वीडियो प्लेयर</span> + <span class="text-brand-500">सबटाइटल एडिटर</span><br>द्विभाषी सबटाइटल के लिए निर्मित',
+    hero_sub: 'एक साथ प्ले करें और अनुवाद करें — अब खोजने की ज़रूरत नहीं<br>ऑल-इन-वन सबटाइटल वर्कफ़्लो — सहज, सुगम और आसान।',
     btn_win: 'Windows डाउनलोड (Win64)',
     btn_baidu: 'Baidu नेटडिस्क (कोड: sub8)',
     btn_telegram: 'Telegram समुदाय',
@@ -1029,8 +1090,8 @@ const i18nData = {
     nav_download: 'Baixar',
     nav_mobile_dl: 'Baixar',
     hero_badge: 'SubsPlayer V1.0.0 Lançado · Desenvolvido com Gemini AI Engine',
-    hero_title: 'Gere legendas bilingues automaticamente em 1 minuto. Reproduza & Traduza Simultaneamente<br><span class="text-brand-500">Reprodutor de Vídeo</span> + <span class="text-brand-500">Editor de Legendas</span><br>Criado para Legendas Bilingues',
-    hero_sub: 'Fluxo de trabalho de legendas completo — intuitivo, fluido e sem esforço.',
+    hero_title: 'Gere legendas bilingues automaticamente em 1 minuto<br><span class="text-brand-500">Reprodutor de Vídeo</span> + <span class="text-brand-500">Editor de Legendas</span><br>Criado para Legendas Bilingues',
+    hero_sub: 'Reproduza & Traduza Simultaneamente — sem precisar procurar por aí<br>Fluxo de trabalho de legendas completo — intuitivo, fluido e sem esforço.',
     btn_win: 'Baixar Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Código: sub8)',
     btn_telegram: 'Comunidade Telegram',
@@ -1065,8 +1126,8 @@ const i18nData = {
     nav_download: 'Descargar',
     nav_mobile_dl: 'Descargar',
     hero_badge: 'SubsPlayer V1.0.0 Lanzado · Impulsado por Gemini AI Engine',
-    hero_title: 'Genera subtítulos bilingües automáticamente en 1 minuto. Reproduce y Traduce Simultáneamente<br><span class="text-brand-500">Reproductor de Video</span> + <span class="text-brand-500">Editor de Subtítulos</span><br>Creado para Subtítulos Bilingües',
-    hero_sub: 'Flujo de trabajo de subtítulos todo en uno — intuitivo, fluido y sin esfuerzo.',
+    hero_title: 'Genera subtítulos bilingües automáticamente en 1 minuto<br><span class="text-brand-500">Reproductor de Video</span> + <span class="text-brand-500">Editor de Subtítulos</span><br>Creado para Subtítulos Bilingües',
+    hero_sub: 'Reproduce y Traduce Simultáneamente — sin buscar por todas partes<br>Flujo de trabajo de subtítulos todo en uno — intuitivo, fluido y sin esfuerzo.',
     btn_win: 'Descargar Windows (Win64)',
     btn_baidu: 'Baidu Netdisk (Código: sub8)',
     btn_telegram: 'Comunidad Telegram',
