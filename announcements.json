@@ -1,9 +1,9 @@
 {
   "announcements": [
     {
-      "id": "notice-001",
-      "title": "播放列表功能更新",
-      "body": "播放列表新增了清除播放记录按钮。"
+      "id": "notice-002",
+      "title": "播放列表功能更新 / Playlist Feature Update",
+      "body": "本应用的主要功能已成熟，后期有新需求请在GitHub开issue / The core features of this app are now fully developed. If you have any new requests in the future, please open an issue on GitHub."
     }
   ]
 }
