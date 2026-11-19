@@ -14,6 +14,17 @@
 
 SubsPlayer is not only a Windows video player, but also a subtitle editor built for subtitle workflows. It covers the full pipeline — **extract → align → translate → edit → hard-sub OCR → effects** — with features tuned for common pain points in bilingual subtitle production.
 
+## New features and highlights
+
+* **Automatic transcription and translation for videos without subtitles:** generate a source SRT and bilingual ASS directly from speech, without an existing subtitle file. The result loads automatically for playback, review, and editing.
+* **Enter player-only mode in one click:** right-click **Switch layout** to hide the subtitle browser and give the video the main window. Left-click the button to cycle through editing layouts. The app remembers the layout and player mode when you close it.
+* **Edit subtitles in player-only mode:** enable **Edit subtitles in player** in Settings, then click the active external subtitle area near the bottom of the video. Playback pauses and a floating editor opens for source text, translation, timing, and styling. Save and resume when finished.
+* **Segment transcription with translation:** choose a video time range and language to fill in missing dialogue, optionally translating it with AI and adding the results to the current subtitles.
+* **More subtitle tools:** right-click to retranslate, merge, split, or shift selected rows; use rectangular or custom four-point OCR; export ASS / SRT or multiple versions in a ZIP.
+
+> Automatic transcription and translation for videos without subtitles require a valid Gemini API key and access to the AI service. Simultaneous translation uses your current translation settings, including target language, glossary, and bilingual order. Playback, manual editing, and local subtitle synchronization do not require AI credentials.
+
+
 ---
 
 ## 🖥 Screenshots
@@ -28,7 +39,7 @@ SubsPlayer is not only a Windows video player, but also a subtitle editor built 
 
 ![Open video dialog](Screenshot/main2.jpg)
 
-> When opening a video, enable **Auto-generate bilingual subtitles** to translate in one click — no more missing subs when binge-watching.
+> For videos with embedded subtitles, enable **Auto-generate bilingual subtitles** when opening to extract and translate them automatically. For videos without usable subtitles, use **Generate Subtitles** to transcribe and translate speech.
 
 ### Hard-sub OCR
 
@@ -40,13 +51,14 @@ SubsPlayer is not only a Windows video player, but also a subtitle editor built 
 
 ![ASS effects](Screenshot/main2ass.jpg)
 
-> After selecting a line, use the color palette and `\an1`–`\an9` alignment grid to insert style/position tags; fade in/out supported, with live preview.
+> After selecting a line, use the color palette and `\an1`–`\an9` alignment grid to insert style and position tags. Drag across grid cells to create a movement effect in the corresponding direction. Fade-in and fade-out effects are also supported, with live preview.
 
 ---
 
 ## ✨ Key Features
 
-*   **Subtitle extraction**
+*   **Automatic speech transcription and translation** — generate a source SRT and bilingual ASS from the selected audio track, with automatic loading on completion; selected time ranges are supported
+*   **One-click player mode and in-player subtitle editing** — right-click the layout button to enter player-only mode, then click subtitles to edit after enabling the setting
 *   **Automated timeline alignment** — fix offset/drift using the current video audio track or a known-good reference subtitle
 *   **AI translation engine**
     *   Gemini REST API supported
@@ -69,23 +81,42 @@ SubsPlayer is not only a Windows video player, but also a subtitle editor built 
 
 > **Player-only mode / extract / align / manual edit** need no API key. After install you can play video and load external subs without configuring a key.
 
+### Switch to player-only mode and edit while watching
+
+1. **Enter player-only mode.** Right-click **Switch layout** in the player to hide the subtitle browser. Left-click the button to switch to an editing layout when needed.
+2. **Enable in-player editing.** Turn on **Edit subtitles in player** in Settings (off by default) and load editable external subtitles. Extract embedded subtitles first.
+3. **Click to edit.** While a subtitle is visible, click its area near the bottom of the video. Playback pauses and a floating editor opens. Edit the source, translation, timing, or styling, with changes previewed in the video.
+4. **Save and keep watching.** Click Save to save and close the editor, or use **Save and resume** / `Ctrl+Enter` to save and continue playback.
+
+### Videos without subtitles: speech to bilingual subtitles
+
+1. Sign in with your Google account and follow the link to obtain a free **Gemini API key**. Enter the key in Settings, then choose the translation target language and bilingual order.
+2. Click **Generate Subtitles** in the main menu and choose a video. If it has multiple audio tracks, first select the track you want to transcribe in the player.
+3. Leave **Translate subtitles with AI while transcribing** checked in the confirmation dialog, then click **Start**. Uncheck it to generate source subtitles only.
+4. The app processes speech, generates timings, and translates batches automatically. It saves a **source SRT + bilingual ASS** next to the video and loads the result on completion for review, editing, and export.
+5. To fill in only a short section, click the **transcription button** immediately to the left of the subtitle styling button in the editor toolbar. Choose a start time, end time, and language, and optionally enable simultaneous translation.
+
+> **Auto-generate bilingual subtitles** in the Open Video dialog extracts and translates **existing embedded subtitle tracks**. Use **Generate Subtitles** for videos without subtitles.
+
 ## Recommended subtitle translation & edit workflow (API key required)
 
-1. **Import video** — Open Video or drag files in; optionally enable **Auto-generate bilingual subtitles**
-2. **Extract subs** — for videos with embedded tracks, click Extract Subs and batch-export to external SRT
+1. **Import video** — Open Video or drag files in; enable **Auto-generate bilingual subtitles** if embedded subtitle tracks are available
+2. **Prepare subtitles** — extract embedded tracks to external SRT, or use **Generate Subtitles** with AI translation enabled to create bilingual subtitles directly from speech
 3. **Align timing** — if A/V is out of sync, Align Subs against the current audio track or a reference SRT
 4. **AI Translate** — select the SRT, set target language / bilingual / cleaning / glossary; multiple keys rotate automatically
-5. **Visual proofreading** — edit translation and timing while playing; use OCR on hard-subs when needed, plus basic effects
+5. **Review and export** — edit in a full editing layout or player-only mode; use OCR, segment transcription, and styling as needed, then save or export ASS / SRT / multiple versions in a ZIP
 
 ---
 
 ## 🔑 Gemini API Key — Obtain & Configure
 
-> **AI Translate, hard-sub OCR, and auto-generate bilingual subtitles** require a valid Gemini API key.
+> **Speech transcription with optional translation, AI Translate, hard-sub OCR, and auto-generate bilingual subtitles** use online AI services. Speech transcription requires a valid Gemini API key; the following guide explains how to obtain and configure one.
 
-### 1. Create a key in Google AI Studio
+### 1. Sign in via the Google button and create a free API key in Google AI Studio
 
-1. Open the official page:  
+Click the Google button in the app, sign in to your account, and follow the link to Google AI Studio.
+
+1. Alternatively, open the official page in your browser:  
    **[https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)**
 
 2. Sign in with a Google account and accept the terms.
@@ -151,6 +182,13 @@ The app calls Gemini via the official endpoint:
 3. **Playback works, but all AI features fail?**  
    Usually missing keys or no route to Google’s API — unrelated to the player core.
 
+
+4. **Which option should I use if the video has no subtitles at all?**  
+   Use **Generate Subtitles** and leave **Translate subtitles with AI while transcribing** checked. The Open Video option **Auto-generate bilingual subtitles** requires an existing embedded subtitle track.
+
+5. **Clicking subtitles in player-only mode does not open the editor?**  
+   Enable **Edit subtitles in player** in Settings and load editable external subtitles. Click the lower subtitle area while a cue is visible. Embedded or burned-in subtitles must first be extracted, transcribed, or recognized with OCR to create editable subtitles.
+
 ---
 
 ## 🙏 Acknowledgements
@@ -162,7 +200,7 @@ SubsPlayer stands on the shoulders of these excellent open-source projects and s
 | **FFmpeg** | FFmpeg team | https://ffmpeg.org |
 | **FFmpeg Windows builds** | Gyan Doshi | https://www.gyan.dev/ffmpeg/ |
 | **mpv / libmpv** | mpv-player team | https://mpv.io · https://github.com/mpv-player/mpv |
-| **alass** | kaegi (Alana Sanchez) | https://github.com/kaegi/alass |
+| **ffsubsync** | smacke & contributors | https://github.com/smacke/ffsubsync |
 | **Qt / PySide6** | The Qt Company | https://doc.qt.io/qtforpython/ |
 | **python-mpv** | jaseg | https://github.com/jaseg/python-mpv |
 | **pysubs2** | Tomáš Karabela | https://github.com/tkarabela/pysubs2 |
